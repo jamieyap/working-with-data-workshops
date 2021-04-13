@@ -28,6 +28,8 @@ path_pns_staged_data <- Sys.getenv("path_pns_staged_data")
 
 **GOAL:** By the end of this module, you will have set up your computing environment with the appropriate software versions. Additionally, you would also be able to read and view the curated data files using `R`.
 
+**CODE FOR THIS MODULE:** `module-getting-started.R`.
+
 
 # Set Up of Software
 
@@ -39,13 +41,6 @@ library(lme4)
 ```
 
 We note that we are using the following combination of versions of software for Module 1: `R 4.0.4`, `dplyr 1.0.5`, `lme4 1.1-25`. The code examples presented in the current and succeeding modules in this workshop may not display output as expected when using older versions of these software. In particular, examples reading csv files using versions of `R` prior to `4.0` or using versions of `lme4` prior to `1.0` will not result in output identical to what will be shown in this module.
-
-One of the simplest ways to install specific combinations of `R` packages is through the `install_version()` function of the `devtools` package, like so:
-
-```{r, eval = FALSE}
-install_version("dplyr", version = "1.0.5", repos = "http://cran.us.r-project.org")
-install_version("lme4", version = "1.1-25", repos = "http://cran.us.r-project.org")
-```
 
 Specific versions of `R` itself can be downloaded from the following URLs, depending on your operating system:
 
@@ -61,6 +56,15 @@ Specific versions of `R` itself can be downloaded from the following URLs, depen
 
 **CAUTION:** Check the particular version of `R` you are working with prior to starting any analysis. If you are not working with the required version, you may switch versions through the `Tools -> Global Options -> General` tab if you are using R Studio.
 
+You may already have some version of the `dplyr` or `lme4` package installed. However, if you would like to use the specific versions used in this workshop, one of the simplest ways is to first uninstall any existing version you may have using the `remove.packages` function from the `utils` package, and then install specific versions of `R` packages through the `install_version()` function of the `devtools` package, like so:
+
+```{r, eval = FALSE}
+utils::remove.packages("dplyr")
+utils::remove.packages("lme4")
+
+devtools::install_version("dplyr", version = "1.0.5", repos = "http://cran.us.r-project.org")
+devtools::install_version("lme4", version = "1.1-25", repos = "http://cran.us.r-project.org")
+```
 
 As check, you may run `sessionInfo()`. Displayed below is the combination of software versions used for the modules in this workshop.
 
@@ -81,7 +85,10 @@ path_pns_staged_data <- "C:/Users/jamieyap/Desktop/staged_data"
 
 # Reading in Data Files
 
-Let's now read in the data files we will be using in Module 1. Note that these data files should be within the location specified in `path_pns_input_data`.
+Let's now read in the data files we will be using in Module 1. The following are noteworthy:
+
+* These data files should be within the location specified in `path_pns_input_data`.
+* We set the value of `na.strings` to be a blank character, which tells `R` to treat such characters in a csv file as missing values. This is necessary since, by default, `R` treats cells coded as `NA` as missing values, i.e., by default, `na.strings = "NA"`, but all missing values in the curated data files are coded as blanks.
 
 ```{r, message = FALSE, warning = FALSE}
 dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
