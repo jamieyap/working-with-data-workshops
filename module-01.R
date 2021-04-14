@@ -1,8 +1,10 @@
 library(dplyr)
 library(lme4)
 
-path_pns_input_data <- Sys.getenv("path_pns_input_data")
-path_pns_output_data <- Sys.getenv("path_pns_output_data")
+path_pns_input_data <- "C:/Users/jamieyap/Desktop/input_data"
+path_pns_output_data <- "C:/Users/jamieyap/Desktop/output_data"
+# We will use this location to store plots
+path_pns_staged_data <- "C:/Users/jamieyap/Desktop/staged_data"
 
 dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
 ema_item_names <- read.csv(file.path(path_pns_input_data, "ema_item_names.csv"), header = TRUE, na.strings = "")
@@ -87,13 +89,78 @@ write.csv(dat_sensitivity_analysis, file.path(path_pns_output_data, "dat_sensiti
 # Let's visualize how many and when EMAs occur during each participant-day
 ###############################################################################
 
-current_participant <- all_participant_ids[1]
-current_day <- 0
+ids_main_analysis <- unique(dat_main_analysis$id)
 
-dat_participant_day <- dat_big_merged_postquit %>% 
-  filter(id == current_participant) %>%
-  filter(days_since_quit == current_day)
+for(idx_participant in 1:length(ids_main_analysis)){
+  for(idx_day in 0:20){
+    
+    # Pick a participant-day
+    current_participant <- ids_main_analysis[idx_participant]
+    current_day <- idx_day
+    
+    # Create a visual snapshot of the entire participant day
+    # Tells R where to save the plot and the plot's file name
+    jpeg(filename=file.path(path_pns_staged_data, paste("Participant_", current_participant, "_Day_", current_day, ".jpg",sep="")), width=1200, height=350, units="px")
+    
+    # Take rows corresponding to this particular participant-day
+    dat_participant_day <- dat_big_merged_postquit %>% 
+      filter(id == current_participant) %>%
+      filter(days_since_quit == current_day)
+    
+    # We note that the time_unixts variable would simultaneously capture
+    # these two conditions. Hence, we simply refer to the time_unixts
+    # variable in the steps below
+    
+    # Create more time variables for plotting
+    # Let's create a new variable, start of day to be at 12am
+    # of the date in time_hrts. Selecting 12am
+    # is a convenient way to calculate the position of the
+    # markers in our plot
+    dat_participant_day <- dat_participant_day %>%
+      mutate(start_of_day_hrts = strptime(time_hrts, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")) %>% 
+      mutate(start_of_day_hrts = strftime(time_hrts, format = "%Y-%m-%d", tz = "UTC")) %>%
+      mutate(start_of_day_unixts = 	as.numeric(as.POSIXct(start_of_day_hrts, tz = "UTC", origin="1970-01-01"))) 
+    
+    # For each EMA, calculate hour of day when it was
+    # when participant began responding to the EMA (if with_any_response=1)
+    # or the time of day when it was launched (if with_any_response=0)
+    dat_participant_day <- dat_participant_day %>% 
+      mutate(hours_elapsed = (time_unixts-start_of_day_unixts)/(60*60)) %>%
+      # Simple rearrangement of columns so that the new variables we created would appear
+      # in the first few columns
+      select(start_of_day_hrts, start_of_day_unixts, hours_elapsed, everything())
+    
+    # Identify which rows correspond to each kind of EMA
+    plotdat_random <- dat_participant_day %>% filter(assessment_type == "Post-Quit Random")
+    plotdat_urge <- dat_participant_day %>% filter(assessment_type == "Post-Quit Urge")
+    plotdat_already_slipped <- dat_participant_day %>% filter(assessment_type == "Post-Quit Already Slipped")
+    plotdat_part_one <- dat_participant_day %>% filter(assessment_type == "Post-Quit About to Slip Part One")
+    plotdat_part_two <- dat_participant_day %>% filter(assessment_type == "Post-Quit About to Slip Part Two")
+    
+    # Layer on each component of the plot
+    plot(-1, xaxt = "n", yaxt = "n", 
+         xlab = "Hour of the Day ('0' represents midnight)", ylab = "", 
+         xlim = c(0,24), ylim = c(0,0.3), 
+         cex.lab = 2, 
+         frame.plot = FALSE)
+    axis(1, at = seq(0,24,3), cex.axis = 2, lwd.ticks = 2, gap.axis = 1.2)
+    
+    # Note that if the number of rows in the plot data is equal to zero,
+    # then no new points will be added to the existing plot; no error message will be displayed
+    points(plotdat_random$hours_elapsed, rep(0.1, nrow(plotdat_random)), pch = 19, cex = 2, col = "black")
+    points(plotdat_urge$hours_elapsed, rep(0.1, nrow(plotdat_urge)), pch = 19, cex = 2, col = "orange")
+    points(plotdat_already_slipped$hours_elapsed, rep(0.1, nrow(plotdat_already_slipped)), pch = 19, cex = 2, col = "seagreen")
+    points(plotdat_part_one$hours_elapsed, rep(0.1, nrow(plotdat_part_one)), pch = 19, cex = 2, col = "lightblue")
+    points(plotdat_part_two$hours_elapsed, rep(0.1, nrow(plotdat_part_two)), pch = 19, cex = 2, col = "blue")
+    
+    legend("topleft", c("Random", "Urge", "Already Slipped", "Part One", "Part Two"),
+           col = c("black", "orange", "seagreen", "lightblue", "blue"),
+           pch = rep(19,5), pt.cex = rep(2,5), cex = 1.2)
+    
+    # Tells R that plot is complete
+    dev.off()
+  }
+}
 
-# ADD HERE LATER
 
 

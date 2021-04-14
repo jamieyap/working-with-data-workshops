@@ -1,8 +1,8 @@
 library(dplyr)
 library(lme4)
 
-path_pns_input_data <- Sys.getenv("path_pns_input_data")
-path_pns_output_data <- Sys.getenv("path_pns_output_data")
+path_pns_input_data <- "C:/Users/jamieyap/Desktop/input_data"
+path_pns_output_data <- "C:/Users/jamieyap/Desktop/output_data"
 
 dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
 ema_item_names <- read.csv(file.path(path_pns_input_data, "ema_item_names.csv"), header = TRUE, na.strings = "")
@@ -192,7 +192,7 @@ dat_new <- left_join(x = dat_new, y = dat4a, by = c("id", "days_since_quit"))
 # rating to the question, 'I feel enthusiastic'
 
 dat4b <- dat_big_merged_postquit %>%
-  filter(assessment_type == "Post-Quit Random EMA" | assessment_type == "Pre-Quit Random EMA") %>%
+  filter(assessment_type == "Post-Quit Random" | assessment_type == "Pre-Quit Random") %>%
   group_by(id, days_since_quit) %>%
   summarise(mean_enthusiastic = MyMean(enthusiastic))
 
@@ -260,7 +260,8 @@ dat_sensitivity_analysis <- dat_new %>% filter(sensitivity == 1)
 # an imputation procedure prior to running glmer
 
 # Estimate coefficients of the model using glmer
-fit_main <- glmer(any_smoking ~ 1 + days_since_quit + mean_enthusiastic + days_since_quit:mean_enthusiastic + (1 | id), data = na.omit(dat_main_analysis), family = "binomial")
+use_dat <- na.omit(dat_main_analysis)
+fit_main <- glmer(any_smoking ~ 1 + days_since_quit + mean_enthusiastic + days_since_quit:mean_enthusiastic + (1 | id), data = use_dat, family = "binomial")
 summary(fit_main)
 
 ###############################################################################
@@ -270,7 +271,8 @@ summary(fit_main)
 # Similar to the Main Analysis, we will also do a complete-case analysis
 
 # Estimate coefficients of the model using glmer
-fit_sensitivity <- glmer(any_smoking ~ 1 + days_since_quit + mean_enthusiastic + days_since_quit:mean_enthusiastic + (1 | id), data = na.omit(dat_sensitivity_analysis), family = "binomial")
+use_dat <- na.omit(dat_sensitivity_analysis)
+fit_sensitivity <- glmer(any_smoking ~ 1 + days_since_quit + mean_enthusiastic + days_since_quit:mean_enthusiastic + (1 | id), data = use_dat, family = "binomial")
 summary(fit_sensitivity)
 
 # Let's save these two datasets to the location path_pns_output_data
