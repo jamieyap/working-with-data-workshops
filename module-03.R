@@ -72,12 +72,6 @@ dat_new <- left_join(x = dat1, y = dat2, by = c("id"))
 # Drop rows corresponding to those participants which will be excluded from all data analysis
 dat_new <- dat_new %>% filter(exclude == 0)
 
-###############################################################################
-# This is just prior to where we left off in Module 01 (before creating the
-# datasets dat_main_analysis and dat_sensitivity_analysis).
-# Module 02 begins here
-###############################################################################
-
 # Step 3: We illustrate a subtle point.
 #
 # A new variable was created using dat_big_merged_postquit:
@@ -101,6 +95,12 @@ dat3 <- dat_big_merged_postquit %>%
 # and then slot in information from dat3 into each row within dat_new
 dat_new <- left_join(x = dat_new, y = dat3, by = c("id", "days_since_quit"))
 dat_new <- dat_new %>% mutate(tot_ema_launched = replace(tot_ema_launched, is.na(tot_ema_launched), 0))
+
+###############################################################################
+# This is just prior to where we left off in Module 01 (before creating the
+# datasets dat_main_analysis and dat_sensitivity_analysis).
+# Module 02 begins here
+###############################################################################
 
 # Define some functions which will be useful in the analyses
 # We prefer to not use R's built-in mean and max functions
@@ -153,27 +153,54 @@ MyMax <- function(x){
   return(output)
 }
 
-# Step 4:
+###############################################################################
+# Module 03 begins here. 
+# This is just prior to Step 4 in Module 02.
+# Step 4 in Module 2 will be modified, but Step 5 in Modules 2 and 3 are
+# identical. We will break down Step 4 into two substeps
+###############################################################################
+
+# Step 4a:
 #
-# Several new variables were created using dat_big_merged_postquit. We note that
-# these calculations only utilize available data to calculate means and maximums
-# If there is no data (occurs when no rating for the question was provided)
-# then the value of the variables created will be missing.
+# The variable any_smoking was created using dat_big_merged_postquit. 
 #
 # any_smoking: use the variable smoking_indicator to check whether there was 
 # a reported occurrence of smoking
+
+dat4a <- dat_big_merged_postquit %>%
+  group_by(id, days_since_quit) %>%
+  summarise(any_smoking = MyMax(smoking_indicator))
+
+# We merge dat4a and dat_new
+# Notice the use of left_join -- we wish to retain all rows in dat_new
+# and then slot in information from dat4a into each row within dat_new
+dat_new <- left_join(x = dat_new, y = dat4a, by = c("id", "days_since_quit"))
+
+# Step 4b Rationale:
+# While we would like to use all kinds of EMA for the dependent variable 
+# (which captures smoking behavior), often, we would only like to use
+# responses from Random EMA for our independent variables.
+# How might we go about selecting those rows corresponding to Random EMA
+# so that the variable enthusiastic is constructed only using responses
+# from Random EMA.
+
+# Step 4b:
+#
+# The variable mean_enthusiastic was created using dat_big_merged_postquit. 
+#
 # mean_enthusiastic: use the variable enthusiastic to calculate the average
 # rating to the question, 'I feel enthusiastic'
 
-dat4 <- dat_big_merged_postquit %>%
+dat4b <- dat_big_merged_postquit %>%
+  filter(assessment_type == "Post-Quit Random EMA" | assessment_type == "Pre-Quit Random EMA") %>%
   group_by(id, days_since_quit) %>%
-  summarise(any_smoking = MyMax(smoking_indicator),
-            mean_enthusiastic = MyMean(enthusiastic))
+  summarise(mean_enthusiastic = MyMean(enthusiastic))
 
-# We merge dat4 and dat_new
+# We merge dat4b and dat_new
 # Notice the use of left_join -- we wish to retain all rows in dat_new
-# and then slot in information from dat4 into each row within dat_new
-dat_new <- left_join(x = dat_new, y = dat4, by = c("id", "days_since_quit"))
+# and then slot in information from dat4b into each row within dat_new
+dat_new <- left_join(x = dat_new, y = dat4b, by = c("id", "days_since_quit"))
+
 
 # Step 5:
 #
@@ -220,9 +247,34 @@ dat_main_analysis <- dat_new
 # Now, using dat_new, take those rows which will be included in Sensitivity Analysis
 dat_sensitivity_analysis <- dat_new %>% filter(sensitivity == 1)
 
-# Let's save these two datasets to the location path_pns_output_data
-write.csv(dat_main_analysis, file.path(path_pns_output_data, "dat_main_analysis_module02.csv"), row.names = FALSE, na = "")
-write.csv(dat_sensitivity_analysis, file.path(path_pns_output_data, "dat_sensitivity_analysis_module02.csv"), row.names = FALSE, na = "")
+# Step 6: Estimate models
 
+###############################################################################
+# Main Analysis
+###############################################################################
+
+# We will do a complete-case analysis. 
+# Rows having missing values in either one of the variables any_smoking or
+# mean_enthusiastic will be omitted. In your analysis, you would have to
+# consider how to address missing data in both of these variables, e.g., via
+# an imputation procedure prior to running glmer
+
+# Estimate coefficients of the model using glmer
+fit_main <- glmer(any_smoking ~ 1 + days_since_quit + mean_enthusiastic + days_since_quit:mean_enthusiastic + (1 | id), data = na.omit(dat_main_analysis), family = "binomial")
+summary(fit_main)
+
+###############################################################################
+# Sensitivity Analysis
+###############################################################################
+
+# Similar to the Main Analysis, we will also do a complete-case analysis
+
+# Estimate coefficients of the model using glmer
+fit_sensitivity <- glmer(any_smoking ~ 1 + days_since_quit + mean_enthusiastic + days_since_quit:mean_enthusiastic + (1 | id), data = na.omit(dat_sensitivity_analysis), family = "binomial")
+summary(fit_sensitivity)
+
+# Let's save these two datasets to the location path_pns_output_data
+write.csv(dat_main_analysis, file.path(path_pns_output_data, "dat_main_analysis_module03.csv"), row.names = FALSE, na = "")
+write.csv(dat_sensitivity_analysis, file.path(path_pns_output_data, "dat_sensitivity_analysis_module03.csv"), row.names = FALSE, na = "")
 
 

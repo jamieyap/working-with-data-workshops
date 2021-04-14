@@ -29,12 +29,19 @@ dat_big_merged_postquit <- dat_big_merged_postquit %>%
 # reconsidered depending on the kind of analysis being performed
 dat_big_merged_postquit <- dat_big_merged_postquit %>%
   mutate(enthusiastic  = case_when(
+    assessment_type == "Post-Quit Already Slipped EMA" ~ postquit_alreadyslipped_item_9,
     assessment_type == "Post-Quit Random" ~ postquit_random_item_9,
     assessment_type == "Post-Quit Urge" ~ postquit_urge_item_9,
     assessment_type == "Post-Quit About to Slip Part One" ~ postquit_partone_item_8,
     assessment_type == "Post-Quit About to Slip Part Two" ~ postquit_parttwo_item_9,
-    assessment_type == "Post-Quit Random" ~ postquit_random_item_9,
-    assessment_type == "Post-Quit Already Slipped EMA" ~ postquit_alreadyslipped_item_9,
+    # One may wonder why there is a need to include Pre-Quit-type EMAs
+    # The reason has to do with the fact that it is possible for 
+    # some Pre-Quit Type EMA Questionnaires to be launched after the working quit date
+    # Rows corresponding to such questionnaires will have use_as_postquit = 1
+    assessment_type == "Pre-Quit Random" ~ prequit_random_item_9,
+    assessment_type == "Pre-Quit Urge" ~ prequit_urge_item_9,
+    assessment_type == "Pre-Quit Smoking Part One" ~ prequit_partone_item_8,
+    assessment_type == "Pre-Quit Smoking Part Two" ~ prequit_parttwo_item_9,
     # Otherwise, set the value of enthusiastic to a missing value
     # Aside from NA_integer_, other options are NA_character, NA_real_, NA_complex_ etc
     # We selected NA_integer_ out of all these options because responses to the above
@@ -65,38 +72,6 @@ dat_new <- left_join(x = dat1, y = dat2, by = c("id"))
 # Drop rows corresponding to those participants which will be excluded from all data analysis
 dat_new <- dat_new %>% filter(exclude == 0)
 
-# Step 3: We illustrate a subtle point.
-#
-# Several new variables were created using dat_big_merged_postquit:
-# tot_ema_launched: count the total number of EMAs launched
-# n_missing_enthusiastic: Out of those EMAs in tot_launched, how many had
-# a missing value in enthusiastic
-# n_complete_enthusiastic: Out of those EMAs in tot_launched, how many had
-# a non-missing value in enthusiastic
-#
-# It is possible that the software is not able to launch an EMA
-# due to the fact that the smartphone may be switched off, or due to 
-# an unanticipated tech issue. Hence, after dat3 is merged with dat_new, 
-# those days will be represented by a missing value in
-# tot_ema_launched, n_missing_enthusiastic, n_complete_enthusiastic
-# We then must replace the missing value in tot_ema_launched with a zero ('0') 
-# to indicate that there were zero successfully launched EMA for those days.
-# When there are no EMAs launched on a particular day, we will still
-# retain a missing value for the 
-# n_missing_enthusiastic and n_complete_enthusiastic variables
-
-dat3 <- dat_big_merged_postquit %>%
-  group_by(id, days_since_quit) %>%
-  summarise(tot_ema_launched = n(),
-            n_missing_enthusiastic = sum(is.na(enthusiastic)),
-            n_complete_enthusiastic = sum(!is.na(enthusiastic)))
-
-# We merge dat3 and dat_new
-# Notice the use of left_join -- we wish to retain all rows indat_new
-# and then slot in information from dat3 into each row within dat_new
-dat_new <- left_join(x = dat_new, y = dat3, by = c("id", "days_since_quit"))
-dat_new <- dat_new %>% mutate(tot_ema_launched = replace(tot_ema_launched, is.na(tot_ema_launched), 0))
-
 # Create a copy of dat_new with the name dat_main_analysis, 
 # which is the dataset we will use for Main Analysis
 dat_main_analysis <- dat_new
@@ -107,5 +82,18 @@ dat_sensitivity_analysis <- dat_new %>% filter(sensitivity == 1)
 # Let's save these two datasets to the location path_pns_output_data
 write.csv(dat_main_analysis, file.path(path_pns_output_data, "dat_main_analysis_module01.csv"), row.names = FALSE, na = "")
 write.csv(dat_sensitivity_analysis, file.path(path_pns_output_data, "dat_sensitivity_analysis_module01.csv"), row.names = FALSE, na = "")
+
+###############################################################################
+# Let's visualize how many and when EMAs occur during each participant-day
+###############################################################################
+
+current_participant <- all_participant_ids[1]
+current_day <- 0
+
+dat_participant_day <- dat_big_merged_postquit %>% 
+  filter(id == current_participant) %>%
+  filter(days_since_quit == current_day)
+
+# ADD HERE LATER
 
 
