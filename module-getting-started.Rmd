@@ -22,7 +22,6 @@ knitr::opts_chunk$set(fig.pos = 'H')
 ```{r, echo = FALSE, warning = FALSE}
 path_pns_input_data <- Sys.getenv("path_pns_input_data")
 path_pns_output_data <- Sys.getenv("path_pns_output_data")
-path_pns_staged_data <- Sys.getenv("path_pns_staged_data")
 ```
 
 
@@ -74,13 +73,12 @@ sessionInfo()
 
 # Set Up of Locations to Store Data Files and Output
 
-We specify the location of input files and output files in the variables `path_pns_input_data` and `path_pns_output_data`, respectively. We may also want to specify a third location, `path_pns_staged_data`, where we would keep intermediate output, perhaps from a data preprocessing step. Note the forward slashes in the specification of the locations.
+We specify the location of input files and output files in the variables `path_pns_input_data` and `path_pns_output_data`, respectively. 
 
 
 ```{r, eval = FALSE}
 path_pns_input_data <- "C:/Users/jamieyap/Desktop/input_data"
 path_pns_output_data <- "C:/Users/jamieyap/Desktop/output_data"
-path_pns_staged_data <- "C:/Users/jamieyap/Desktop/staged_data"
 ```
 
 # Reading in Data Files
@@ -92,8 +90,8 @@ Let's now read in the data files we will be using in Module 1. The following are
 
 ```{r, message = FALSE, warning = FALSE}
 dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
-ema_item_names <- read.csv(file.path(path_pns_input_data, "ema_item_names.csv"), header = TRUE, na.strings = "")
 dat_big_merged <- read.csv(file.path(path_pns_input_data, "merged.csv"), header = TRUE, na.strings = "")
+ema_item_names <- read.csv(file.path(path_pns_input_data, "ema_item_names.csv"), header = TRUE, na.strings = "")
 ```
 
 As a check for whether we have been able to read the files successfully, let's view the first few rows of `ema_item_names`. 
@@ -101,6 +99,5 @@ As a check for whether we have been able to read the files successfully, let's v
 ```{r, message = FALSE, warning = FALSE}
 head(ema_item_names, n=10)
 ```
-
 
 

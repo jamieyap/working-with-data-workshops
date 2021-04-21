@@ -21,9 +21,3 @@ knitr::opts_chunk$set(fig.pos = 'H')
 
 
 The file `ema_item_names.csv` contains the correspondence between the column names in `merged.csv` and the original column names in the codebook `PNS EMA Codebook 07202010.docx`. Inspection of the codebook will show that variable names referring to the same question may be identical across different types of EMAs. For example, the question 'I feel enthusiastic' is present in 8 out of the 9 kinds of EMA -- these 8 kinds of EMA capture responses to this question in a variable named `Affect1`. However, there may be questions which were posed to participants only within specific kinds of EMA. For example, the question 'I _felt_ enthusiastic' is present only in Post-Quit Already Slipped EMAs. As another example, the question 'Think about the cause of your slip. The cause is controllable by me.' is present in 2 out of the 9 kinds of EMA -- these 2 kinds of EMA capture responses to this question in a variable named `Attribution4`.
-
-
-
-
-
-
