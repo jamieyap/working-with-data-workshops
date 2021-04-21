@@ -379,3 +379,182 @@ legend("topright", c("Random", "Urge", "Already Slipped", "Part One", "Part Two"
        col = c("black", "orange", "seagreen", "lightblue", "blue"),
        pch = c(17, 19, 19, 19, 19), pt.cex = rep(2,5), cex = 1.2)
 
+
+
+
+###############################################################################
+# MODULE 4
+#
+# Create dependent variable
+#
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# For each participant, calculate the value of count_within_bounds
+# The number of times count_within_bounds will be calculated is equal to
+# the total number of Random EMAs launched during the post quit period
+# and having with_any_response=1
+# -----------------------------------------------------------------------------
+
+# What are the unique participant IDs which are present in dat_analysis?
+participant_ids <- unique(dat_analysis$id)
+total_participant_ids <- length(participant_ids)
+
+# Create a new variable and initialize with missing value
+# We specify the type of missing value as NA_real_
+# to cue R that this column is a numeric type column.
+# (Other options are NA_character_, NA_integer_, etc.)
+# Doing so will allow us to avoid the following error message below
+# when we eventually update each participant's data
+#
+# Error: Assigned data `value` must be compatible with existing data.
+# i Error occurred for column `count_within_bounds`.
+# x Can't convert from <double> to <logical> due to loss of precision.
+# * Locations: 1, 2, 3.   
+
+dat_analysis$count_within_bounds <- NA_real_
+
+for(i in 1:total_participant_ids){
+  # Which participant are we working with now?
+  current_participant_id <- participant_ids[i]
+  
+  # Grab this participant's rows from dat_analysis
+  current_dat_analysis <- dat_analysis %>% filter(id == current_participant_id)
+  
+  # Grab this participant's rows from dat_smoking
+  current_dat_smoking <- dat_smoking %>% filter(id == current_participant_id)
+  
+  # Which EMAs are in between the current and next Random EMA?
+  # Reminder: We have dropped rows from Random EMAs having no response
+  # to any item (i.e., those having with_any_response=0) from dat_analysis
+  # Reminder: dat_smoking contains data from all successfully launched EMAs
+  # except Random EMAs having with_any_response=0
+  
+  # How many Random EMA having with_any_response=1 does this participant have?
+  total_random_ema <- nrow(current_dat_analysis)
+  
+  all_lower_bound <- current_dat_analysis$time_unixts
+  all_upper_bound <- current_dat_analysis$time_unixts_plusone
+  
+  for(j in 1:total_random_ema){
+    current_lower_bound <- all_lower_bound[j]
+    current_upper_bound <- all_upper_bound[j]
+    
+    # How many EMAs were launched between the two Random EMAs we
+    # are looking at now?
+    dat_within_bounds <- current_dat_smoking %>% 
+      # Note the use of '>' instead of '>=' when checking against left end point
+      # We do not include the number of reported cigarettes smoked in the left end point 
+      # However, we will include the number of reported cigarettes smoked in the right end point
+      filter((time_unixts > current_lower_bound) & (time_unixts <= current_upper_bound))
+    
+    number_within_bounds <- nrow(dat_within_bounds)
+    # Only proceed with further calculations if we have at least one EMA
+    if(number_within_bounds > 0){
+      number_missing <- sum(is.na(dat_within_bounds$smoking_qty))
+      # Only proceed with further calculations if there is no missing value in smoking_qty
+      if(number_missing == 0){
+        current_count_within_bounds <- sum(dat_within_bounds$smoking_qty)
+      } # Mark end of IF STATEMENT
+    } # Mark end of IF STATEMENT
+    
+    current_dat_analysis$count_within_bounds[j] <- current_count_within_bounds
+  } # Mark end of FOR LOOP over Random EMAs having with_any_response=1
+  
+  # Identify which rows should be updated in the current iteration
+  replaced_rows <- which(dat_analysis$id==current_participant_id)
+  # Now that we have identified the rows which we will update,
+  # perform the update
+  dat_analysis[replaced_rows,] <- current_dat_analysis
+} # Mark end of FOR LOOP over participants
+
+# Finally, order according to increasing participant ID
+# and within each participant ID, according to increasing time 
+dat_analysis <- dat_analysis %>% arrange(id, time_unixts)
+
+
+
+
+
+
+###############################################################################
+# MODULE 5
+#
+# Specify and estimate GLMMs
+#
+###############################################################################
+
+# Transform hours elapsed into log-scale
+dat_analysis$logged_hrs_elapsed <- log(dat_analysis$num_hrs_elapsed_since_previous_ema)
+
+# Round up totals;
+# For example, 0.5 will be rounded up to 1; 1.5 will be rounded up to 2, etc.
+dat_analysis$roundedup_count_within_bounds <- as.integer(ceiling(dat_analysis$count_within_bounds))
+
+# Create a new data frame, which is essentially dat_analysis copied
+dat_main_analysis <- dat_analysis
+
+# Now, using dat_main_analysis, take those rows which will be included 
+# in Sensitivity Analysis. In other words, drop all those rows which should
+# be excluded from Sensitivity Analysis
+dat_sensitivity_analysis <- dat_main_analysis %>% filter(sensitivity == 1)
+
+# -----------------------------------------------------------------------------
+# Perform Main Analysis 1
+# -----------------------------------------------------------------------------
+
+# We will do a complete-case analysis. 
+# Rows having missing values in any of the dependent variables or
+# independent variables will be omitted. In your analysis, you would have to
+# consider how to address missing data in both of these variables, e.g., via
+# an imputation procedure prior to running glmer
+
+# Estimate coefficients of the model using glmer
+fit_main_1 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) + 1 + selfeff + (1 | id), 
+                    data = dat_main_analysis, 
+                    family = poisson(link="log"),
+                    na.action = na.omit)
+summary(fit_main_1)
+
+# -----------------------------------------------------------------------------
+# Perform Sensitivity Analysis 1
+# -----------------------------------------------------------------------------
+
+# Estimate coefficients of the model using glmer
+fit_sensitivity_1 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) + 1 + selfeff + (1 | id), 
+                           data = dat_sensitivity_analysis, 
+                           family = poisson(link="log"),
+                           na.action = na.omit)
+summary(fit_sensitivity_1)
+
+# -----------------------------------------------------------------------------
+# Perform Main Analysis 2
+# -----------------------------------------------------------------------------
+
+# In Main Analysis 2, we will divide num_days_since_quit by 100
+# and use this rescaled time variable in our model
+# This rescaling helps with model convergence (try removing the division by 100)
+
+# Estimate coefficients of the model using glmer
+fit_main_2 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) + 1 + selfeff + I(num_days_elapsed_since_quit/100) + selfeff:I(num_days_elapsed_since_quit/100) + (1 | id),
+                    data = dat_main_analysis, 
+                    family = poisson(link="log"),
+                    na.action = na.omit)
+summary(fit_main_2)
+
+# -----------------------------------------------------------------------------
+# Perform Sensitivity Analysis 2
+# -----------------------------------------------------------------------------
+
+# In Sensitivity Analysis 2, we will divide num_days_since_quit by 100
+# and use this rescaled time variable in our model
+# This rescaling helps with model convergence (try removing the division by 100)
+
+# Estimate coefficients of the model using glmer
+fit_sensitivity_2 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) + 1 + selfeff + I(num_days_elapsed_since_quit/100) + selfeff:I(num_days_elapsed_since_quit/100) + (1 | id), 
+                           data = dat_sensitivity_analysis, 
+                           family = poisson(link="log"),
+                           na.action = na.omit)
+summary(fit_sensitivity_2)
+
+

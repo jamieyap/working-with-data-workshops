@@ -1,228 +1,288 @@
+# Package for data manipulation tasks
 library(dplyr)
+# Package for estimating Generalized Linear Mixed Models (GLMMs)
 library(lme4)
 
-path_pns_input_data <- "C:/Users/jamieyap/Desktop/input_data"
-path_pns_output_data <- "C:/Users/jamieyap/Desktop/output_data"
+# Specify location of input data files
+path_pns_input_data <- Sys.getenv("path_pns_input_data")
+# Specify location of output data files
+path_pns_output_data <- Sys.getenv("path_pns_output_data")
 
+# quit_dates_final.csv is a file containing masterlist of all participant IDs
+# Note that data from individuals who should be excluded from all data analysis (i.e., exclude = 1)
+# will NOT be present in ALL curated data files
 dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
-ema_item_names <- read.csv(file.path(path_pns_input_data, "ema_item_names.csv"), header = TRUE, na.strings = "")
+# merged.csv is a file containing information only from records attributed to Event C
+# this particular csv file merges several curated data files (named below) into one data file
+# - post_quit_already_slipped_ema.csv : curated data file containing variables only from the Post-Quit Already Slipped EMA questionnaire
+# - post_quit_random_ema.csv : curated data file containing variables only from the Post-Quit Random EMA questionnaire
+# - post_quit_urge_ema.csv : curated data file containing variables only from the Post-Quit Urge EMA questionnaire
+# - post_quit_about_to_slip_part_one_ema.csv : curated data file containing variables only from the Post-Quit About to Slip Part One EMA questionnaire
+# - post_quit_about_to_slip_part_two_ema.csv : curated data file containing variables only from the Post-Quit About to Slip Part Two EMA questionnaire
+# - pre_quit_random_ema.csv : curated data file containing variables only from the Pre-Quit Random EMA questionnaire
+# - pre_quit_urge_ema.csv : curated data file containing variables only from the Pre-Quit Urge EMA questionnaire
+# - pre_quit_smoking_part_one_ema.csv : curated data file containing variables only from the Pre-Quit Smoking Part One EMA questionnaire
+# - pre_quit_smoking_part_two_ema.csv : curated data file containing variables only from the Pre-Quit Smoking Part Two EMA questionnaire
+# - smoking.csv : curated data file containing variables that you would use to construct the smoking outcome
 dat_big_merged <- read.csv(file.path(path_pns_input_data, "merged.csv"), header = TRUE, na.strings = "")
 
-# Now, begin working with the data
-# Arrange rows according to participant ID and time
-dat_big_merged <- dat_big_merged %>% arrange(id, time_unixts)
-
-# Select only those rows belonging to the post-quit period
-dat_big_merged_postquit <- dat_big_merged %>% filter(use_as_postquit == 1)
-
-# How many days after Quit Day?
-# days_since_quit is equal to zero if an EMA occurred on Quit Day
-# days_since_quit is equal to 1, 2, 3, ... if an EMA occurred one, two, three days after Quit Day 
-dat_big_merged_postquit <- dat_big_merged_postquit %>%
-  mutate(days_since_quit = (time_unixts - quit_unixts)/(60*60*24)) %>%
-  mutate(days_since_quit = floor(days_since_quit))
-
-# Identify which item corresponds to responses to the question 'I feel enthusiastic'
-# Note that we will still include all rows corresponding to Post-Quit Already Slipped EMA
-# even if the question was posed in past tense, i.e., 'I felt enthusiastic'.
-# Including responses from Post-Quit Already Slipped EMA would need to be
-# reconsidered depending on the kind of analysis being performed
-dat_big_merged_postquit <- dat_big_merged_postquit %>%
-  mutate(enthusiastic  = case_when(
-    assessment_type == "Post-Quit Already Slipped EMA" ~ postquit_alreadyslipped_item_9,
-    assessment_type == "Post-Quit Random" ~ postquit_random_item_9,
-    assessment_type == "Post-Quit Urge" ~ postquit_urge_item_9,
-    assessment_type == "Post-Quit About to Slip Part One" ~ postquit_partone_item_8,
-    assessment_type == "Post-Quit About to Slip Part Two" ~ postquit_parttwo_item_9,
-    # One may wonder why there is a need to include Pre-Quit-type EMAs
-    # The reason has to do with the fact that it is possible for 
-    # some Pre-Quit Type EMA Questionnaires to be launched after the working quit date
-    # Rows corresponding to such questionnaires will have use_as_postquit = 1
-    assessment_type == "Pre-Quit Random" ~ prequit_random_item_9,
-    assessment_type == "Pre-Quit Urge" ~ prequit_urge_item_9,
-    assessment_type == "Pre-Quit Smoking Part One" ~ prequit_partone_item_8,
-    assessment_type == "Pre-Quit Smoking Part Two" ~ prequit_parttwo_item_9,
-    # Otherwise, set the value of enthusiastic to a missing value
-    # Aside from NA_integer_, other options are NA_character, NA_real_, NA_complex_ etc
-    # We selected NA_integer_ out of all these options because responses to the above
-    # question are in the form of whole numbers without decimal places
-    TRUE ~ NA_integer_  
-  ))
-
-# Get all participant IDs from our masterlist (aka, the file dat_quit_dates)
-all_participant_ids <- dat_quit_dates$id
-# Count total number of participants in that list
-total_participants <- length(all_participant_ids)
-
-# Step 1: Create a skeleton dataset in long format
-# We will be creating a couple of new datasets which we will merge with dat1
-dat1 <- data.frame(id = rep(all_participant_ids, each = 21), days_since_quit = rep(0:20, times = total_participants))
-
-# Step 2: Grab columns from our masterlist
-# The columns exclude and sensitivity will help us determine
-# which participants to exclude from all data analysis
-# and to include in main analysis/sensitivity analysis
-dat2 <- dat_quit_dates %>% select(id, exclude, sensitivity)
-
-# We merge dat1 and dat2
-# Notice the use of left_join -- we wish to retain all rows in dat1
-# and then slot in information from dat2 into each row within dat1
-dat_new <- left_join(x = dat1, y = dat2, by = c("id"))
-
-# Drop rows corresponding to those participants which will be excluded from all data analysis
-dat_new <- dat_new %>% filter(exclude == 0)
-
 ###############################################################################
-# This is just prior to where we left off in Module 01 (before creating the
-# datasets dat_main_analysis and dat_sensitivity_analysis).
-# Module 02 begins here
+# MODULE 1
+#
+# Work with merged file (merged.csv): identify columns and rows which 
+# correspond to responses to EMA questionnaires and extract them into their
+# own data file; identify columns and rows which will be used as the basis of 
+# the curated smoking outcome variables
 ###############################################################################
 
-# Step 3: We illustrate a subtle point.
+# Here, we will show you how to select the correct rows and columns within
+# the merged.csv file to end up with the 10 individual data files enumerated above
+
+# -----------------------------------------------------------------------------
+# First, extract rows which come from the following types of questionnaires:
+# - Post-Quit Already Slipped EMA questionnaire
+# - Post-Quit Random EMA questionnaire
+# - Post-Quit Urge EMA questionnaire
+# - Post-Quit About to Slip Part One EMA questionnaire
+# - Post-Quit About to Slip Part Two EMA questionnaire
+# -----------------------------------------------------------------------------
+
+# How do we get from merged.csv to post_quit_already_slipped_ema.csv?
+dat_postquit_alreadyslipped_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Post-Quit Already Slipped EMA questionnaire
+  select(id:time_unixts, postquit_alreadyslipped_item_1:postquit_alreadyslipped_item_70) %>%
+  # Select those rows corresponding to when Post-Quit Already Slipped EMA was launched
+  filter(assessment_type == "Post-Quit Already Slipped") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# How do we get from merged.csv to post_quit_random_ema.csv?
+dat_postquit_random_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Post-Quit Random EMA questionnaire  
+  select(id:time_unixts, postquit_random_item_1:postquit_random_item_67) %>%
+  # Select those rows corresponding to when Post-Quit Random EMA was launched
+  filter(assessment_type == "Post-Quit Random") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# How do we get from merged.csv to post_quit_urge_ema.csv?
+dat_postquit_urge_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Post-Quit Urge EMA questionnaire
+  select(id:time_unixts, postquit_urge_item_1:postquit_urge_item_67) %>%
+  # Select those rows corresponding to when Post-Quit Urge EMA was launched
+  filter(assessment_type == "Post-Quit Urge") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# How do we get from merged.csv to post_quit_about_to_slip_part_one_ema.csv?
+dat_postquit_partone_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Post-Quit About to Slip Part One EMA questionnaire  
+  select(id:time_unixts, postquit_partone_item_1:postquit_partone_item_64) %>%
+  # Select those rows corresponding to when Post-Quit About to Slip Part One EMA was launched
+  filter(assessment_type == "Post-Quit About to Slip Part One") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# How do we get from merged.csv to post_quit_about_to_slip_part_two_ema.csv?
+dat_postquit_parttwo_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Post-Quit About to Slip Part Two EMA questionnaire
+  select(id:time_unixts, postquit_parttwo_item_1:postquit_parttwo_item_74) %>%
+  # Select those rows corresponding to when Post-Quit About to Slip Part Two EMA was launched
+  filter(assessment_type == "Post-Quit About to Slip Part Two") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# -----------------------------------------------------------------------------
+# Second, extract rows which come from the following types of questionnaires:
+# - Pre-Quit Random EMA questionnaire
+# - Pre-Quit Urge EMA questionnaire
+# - Pre-Quit Smoking Part One EMA questionnaire
+# - Pre-Quit Smoking Part Two EMA questionnaire
+# -----------------------------------------------------------------------------
+
+# How do we get from merged.csv to pre_quit_random_ema.csv?
+dat_prequit_random_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Pre-Quit Random EMA questionnaire  
+  select(id:time_unixts, prequit_random_item_1:prequit_random_item_67) %>%
+  # Select those rows corresponding to when Pre-Quit Random EMA was launched
+  filter(assessment_type == "Pre-Quit Random") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# How do we get from merged.csv to pre_quit_urge_ema.csv?
+dat_prequit_urge_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Pre-Quit Urge EMA questionnaire
+  select(id:time_unixts, prequit_urge_item_1:prequit_urge_item_67) %>%
+  # Select those rows corresponding to when Pre-Quit Urge EMA was launched
+  filter(assessment_type == "Pre-Quit Urge") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# How do we get from merged.csv to pre_quit_smoking_part_one_ema.csv?
+dat_prequit_partone_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Pre-Quit Smoking Part One EMA questionnaire
+  select(id:time_unixts, prequit_partone_item_1:prequit_partone_item_64) %>%
+  # Select those rows corresponding to when Pre-Quit Smoking Part One EMA was launched
+  filter(assessment_type == "Pre-Quit Smoking Part One") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# How do we get from merged.csv to pre_quit_smoking_part_two_ema.csv?
+dat_prequit_parttwo_ema <- dat_big_merged %>%
+  # Select columns corresponding to participant ID and time variables; 
+  # select columns corresponding to items in Pre-Quit Smoking Part Two EMA questionnaire
+  select(id:time_unixts, prequit_parttwo_item_1:prequit_parttwo_item_69) %>%
+  # Select those rows corresponding to when Pre-Quit Smoking Part Two EMA was launched
+  filter(assessment_type == "Pre-Quit Smoking Part Two") %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# -----------------------------------------------------------------------------
+# Third, extract rows which would be the basis of smoking outcome variables
+# -----------------------------------------------------------------------------
+
+# How to we get from merged.csv to smoking.csv?
+dat_smoking <- dat_big_merged %>% 
+  select(id:smoking_delta_minutes) %>%
+  # We consider the "last assessment" to refer to either of the two situations below:
+  # 1. participant-initiated EMAs (any type) having with_any_response=0 or with_any_response=1
+  # 2. Random EMA having with_any_response=1
+  # In other words, the only situation not included in the "last assessment"
+  # are those Random EMAs which the participant did not provide any response
+  # All rows in merged.csv having
+  filter(!is.na(ema_order)) %>%
+  # Remember: order according to increasing participant ID
+  # and within each participant ID, according to increasing time 
+  arrange(id, time_unixts)
+
+# NOTE: By now, we have separated merged.csv into 10 individual data files.
+# The correspondence between the names of the data files we created above and 
+# the stand-alone csv files are enumerated below.
+# So, for example, if you executed the following line of code
 #
-# A new variable was created using dat_big_merged_postquit:
-# tot_ema_launched: count the total number of EMAs launched
+#     write.csv(dat_random_ema, "post_quit_random_ema.csv", row.names = FALSE, na = "")
 #
-# It is possible that the software is not able to launch an EMA
-# due to the fact that the smartphone may be switched off, or due to 
-# an unanticipated tech issue. Hence, after dat3 is merged with dat_new, 
-# those days will be represented by a missing value in
-# tot_ema_launched.
+# An identical copy of post_quit_random_ema.csv will be generated
+
+# - post_quit_already_slipped_ema.csv : dat_postquit_alreadyslipped_ema
+# - post_quit_random_ema.csv : dat_postquit_random_ema
+# - post_quit_urge_ema.csv : dat_postquit_urge_ema
+# - post_quit_about_to_slip_part_one_ema.csv : dat_postquit_partone_ema
+# - post_quit_about_to_slip_part_two_ema.csv : dat_postquit_parttwo_ema
+# - pre_quit_random_ema.csv : dat_prequit_random_ema
+# - pre_quit_urge_ema.csv : dat_prequit_urge_ema
+# - pre_quit_smoking_part_one_ema.csv : dat_prequit_partone_ema
+# - pre_quit_smoking_part_two_ema.csv : dat_prequit_parttwo_ema
+# - smoking.csv : dat_smoking
+
+
+###############################################################################
+# MODULE 2
 #
-# We then must replace the missing value in tot_ema_launched with a zero ('0') 
-# to indicate that there were zero successfully launched EMA for those days.
-
-dat3 <- dat_big_merged_postquit %>%
-  group_by(id, days_since_quit) %>%
-  summarise(tot_ema_launched = n())
-
-# We merge dat3 and dat_new
-# Notice the use of left_join -- we wish to retain all rows indat_new
-# and then slot in information from dat3 into each row within dat_new
-dat_new <- left_join(x = dat_new, y = dat3, by = c("id", "days_since_quit"))
-dat_new <- dat_new %>% mutate(tot_ema_launched = replace(tot_ema_launched, is.na(tot_ema_launched), 0))
-
-# Define some functions which will be useful in the analyses
-# We prefer to not use R's built-in mean and max functions
-# to avoid undesirable behavior when taking the mean or max
-# of an array in cases when all elements of the array are missing.
-# In the PNS study, this can happen if we attempt to take
-# a mean or max of a particular variable across all 
-# EMAs launched within a day, but all such EMAs were ignored
-# by the participant.
-
-MyMean <- function(x){
-  # Input: x is an array of numbers, e.g., (1, 4, 5, 2, 2)
-  # About: MyMean calculates the mean of x only if 
-  # x has at least one non-missing value and returns 'NA'
-  # if all elements of x are missing
-  
-  # How many elements of x are not missing?
-  count_not_missing <- sum(!is.na(x))
-  
-  if(count_not_missing==0){
-    # In the first case, all elements of x are missing
-    output <- NA
-  }else{
-    # In the second case, x may have missing elements,
-    # but x has at least one non-missing value
-    output <- mean(x, na.rm = TRUE)
-  }
-  
-  return(output)
-}
-
-MyMax <- function(x){
-  # Input: x is an array of numbers, e.g., (1, 4, 5, 2, 2)
-  # About: MyMax calculates the maximum of x only if 
-  # x has at least one non-missing value and returns 'NA'
-  # if all elements of x are missing
-  
-  # How many elements of x are not missing?
-  count_not_missing <- sum(!is.na(x))
-  
-  if(count_not_missing==0){
-    # In the first case, all elements of x are missing
-    output <- NA
-  }else{
-    # In the second case, x may have missing elements,
-    # but x has at least one non-missing value
-    output <- max(x, na.rm = TRUE)
-  }
-  
-  return(output)
-}
-
-# Step 4:
+# Work with Random EMA data files (dat_prequit_random_ema and 
+# dat_postquit_random_ema)
 #
-# Several new variables were created using dat_big_merged_postquit. We note that
-# these calculations only utilize available data to calculate means and maximums
-# If there is no data (occurs when no rating for the question was provided)
-# then the value of the variables created will be missing.
-#
-# any_smoking: use the variable smoking_indicator to check whether there was 
-# a reported occurrence of smoking
-# mean_enthusiastic: use the variable enthusiastic to calculate the average
-# rating to the question, 'I feel enthusiastic'
+###############################################################################
 
-dat4 <- dat_big_merged_postquit %>%
-  group_by(id, days_since_quit) %>%
-  summarise(any_smoking = MyMax(smoking_indicator),
-            mean_enthusiastic = MyMean(enthusiastic))
+# -----------------------------------------------------------------------------
+# If we were to conduct an investigation of smoking behavior during the 
+# post-quit period, can we identify which rows to include/exclude in our
+# analysis?
+# -----------------------------------------------------------------------------
 
-# We merge dat4 and dat_new
-# Notice the use of left_join -- we wish to retain all rows in dat_new
-# and then slot in information from dat4 into each row within dat_new
-dat_new <- left_join(x = dat_new, y = dat4, by = c("id", "days_since_quit"))
+subset_dat_postquit_random_ema <- dat_postquit_random_ema %>%
+  # Exclude rows corresponding to EMAs having no response to any item
+  filter(with_any_response == 1) %>%
+  # Exclude rows corresponding to EMAs launched before Quit Date
+  filter(use_as_postquit == 1) %>%
+  # Select only the columns you will need;
+  # this process will result in a smaller data file
+  select(id:time_unixts, postquit_random_item_8) %>%
+  rename(selfeff = postquit_random_item_8)
 
-# Step 5:
-#
-# We illustrate a subtle point.
-# Does it make sense to interpret any_smoking=0 as no smoking for a days when
-# only 1 response was provided out of all EMAs launched? 
-# only 2 responses provided out of all EMAs launched? 
-# ... and so on.
-# 
-# Let's count the number of EMAs for which the value of
-# smoking_indicator is not missing.
-# This count is performed using all successfully launched EMAs
+subset_dat_prequit_random_ema <- dat_prequit_random_ema %>%
+  # Exclude rows corresponding to EMAs having no response to any item
+  filter(with_any_response == 1) %>%
+  # Exclude rows corresponding to EMAs launched before Quit Date
+  filter(use_as_postquit == 1) %>%
+  # Select only the columns you will need;
+  # this process will result in a smaller data file
+  select(id:time_unixts, prequit_random_item_8) %>%
+  rename(selfeff = prequit_random_item_8)
 
-dat5 <- dat_big_merged_postquit %>%
-  group_by(id, days_since_quit) %>%
-  summarise(n_not_missing = sum(!is.na(smoking_indicator)),
-            n_missing = sum(is.na(smoking_indicator)))
+# -----------------------------------------------------------------------------
+# Merge the two resulting smaller data files into a single data file
+# named dat_analysis. We will work with dat_analysis from now on; 
+# from here onward, we will perform more data manipulation tasks to 
+# get dat_analysis into a structure that lme4 can recognize
+# -----------------------------------------------------------------------------
 
-# We merge dat5 and dat_new
-# Notice the use of left_join -- we wish to retain all rows in dat_new
-# and then slot in information from dat5 into each row within dat_new
-dat_new <- left_join(x = dat_new, y = dat5, by = c("id", "days_since_quit"))
+# rbind simply stacks the two data files on top of each other
+# rbind will work only if both data files have identical column names
+# Hence, there was a need to call the rename() function above prior
+# to calling rbind()
+dat_analysis <- rbind(subset_dat_postquit_random_ema, subset_dat_prequit_random_ema)
 
-# Let's display the number of EMAs currently having a value for any_smoking
-# across all values of n_not_missing
-dat_summary <- dat_new %>% 
-  filter(tot_ema_launched>0) %>% 
-  group_by(n_not_missing, any_smoking) %>% 
-  summarise(count_rows = n()) %>%
-  arrange(any_smoking, n_not_missing)
+# Remember: order according to increasing participant ID
+# and within each participant ID, according to increasing time 
+dat_analysis <- dat_analysis %>% arrange(id, time_unixts)
 
-# For the sake of example, let's say that we will consider any_smoking to be
-# a missing value when there is at least one EMA launched and 
-# n_not_missing is less than or equal to 2.
-#
-# The point of this example is not whether this specific choice of cutoff is
-# correct, but rather to show where subtle assumptions may com into the analysis
-# This approach would need to be reconsidered in your own analysis.
-dat_new <- dat_new %>% mutate(any_smoking = replace(any_smoking, (tot_ema_launched>0) & (n_not_missing<=2), NA))
+# -----------------------------------------------------------------------------
+# Using dat_analysis:
+# - Calculate number of hours elapsed between the current EMA and the next EMA
+# - Calculate number of days elapsed since the beginning of post-quit period
+# -----------------------------------------------------------------------------
 
-# Create a new data frame, which is essentially dat_new copied
-dat_main_analysis <- dat_new
+# Remember: The calculations below will be incorrect if dat_analysis has not 
+# yet been ordered according to increasing participant ID
+# and within each participant ID, according to increasing time 
 
-# Now, using dat_new, take those rows which will be included in Sensitivity Analysis
-dat_sensitivity_analysis <- dat_new %>% filter(sensitivity == 1)
+dat_analysis <- dat_analysis %>%
+  # The group_by() function is needed to ensure that we do not accidentally 
+  # use data from another participant to calculate lagged time variables 
+  # for a particular participant
+  group_by(id) %>%
+  # When did the participant begin responding to the next EMA?
+  # If there is no EMA that follows the current EMA, we will set time_unixts_plusone 
+  # we will initially set time_unixts_plusone to a missing value
+  mutate(time_unixts_plusone = c(tail(time_unixts, n=-1), NA)) %>%
+  # If there is no EMA that follows the current EMA, we will set time_unixts_plusone 
+  # to be equal to end_study_unixts
+  mutate(time_unixts_plusone = if_else(is.na(time_unixts_plusone), end_study_unixts, time_unixts_plusone)) %>%
+  # How many seconds elapsed between the current and next EMA?
+  mutate(num_secs_elapsed_since_previous_ema = time_unixts_plusone - time_unixts) %>%
+  # Now, make a conversion from seconds to hours
+  mutate(num_hrs_elapsed_since_previous_ema = num_secs_elapsed_since_previous_ema/(60*60))
 
-# Let's save these two datasets to the location path_pns_output_data
-write.csv(dat_main_analysis, file.path(path_pns_output_data, "dat_main_analysis_module02.csv"), row.names = FALSE, na = "")
-write.csv(dat_sensitivity_analysis, file.path(path_pns_output_data, "dat_sensitivity_analysis_module02.csv"), row.names = FALSE, na = "")
+dat_analysis <- dat_analysis %>%
+  # How many seconds elapsed between the current EMA and Quit Date?
+  # Note that we consider 4AM on Quit Date to be the time when participants
+  # quit smoking in the PNS study
+  mutate(num_secs_elapsed_since_quit = time_unixts - quit_unixts) %>%
+  # Now, make a conversion from seconds to hours
+  mutate(num_hrs_elapsed_since_quit = num_secs_elapsed_since_quit/(60*60)) %>%
+  # Now, make a conversion from hours to days
+  mutate(num_days_elapsed_since_quit = num_hrs_elapsed_since_quit/24)
 
-
-
+# Create a new time variable that captures the number of days elapsed since 12AM of start of study
+dat_analysis <- dat_analysis %>%
+  mutate(num_secs_elapsed_since_start_study = time_unixts - start_study_unixts) %>%
+  mutate(num_hrs_elapsed_since_start_study = num_secs_elapsed_since_start_study/(60*60)) %>%
+  mutate(num_days_elapsed_since_start_study = num_hrs_elapsed_since_start_study/24)

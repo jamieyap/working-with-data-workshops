@@ -19,45 +19,6 @@ knitr::opts_chunk$set(tidy = TRUE)
 knitr::opts_chunk$set(fig.pos = 'H')
 ```
 
-```{r, echo = FALSE, warning = FALSE}
-path_pns_input_data <- Sys.getenv("path_pns_input_data")
-path_pns_output_data <- Sys.getenv("path_pns_output_data")
-path_pns_staged_data <- Sys.getenv("path_pns_staged_data")
-```
-
-
-**GOAL:** By the end of Module 1, we will fit a mixed model using data from `merged.csv`. We will demonstrate the step-by-step process required and motivate examples on scientific questions investigating whether _responses to EMAs in the current day_ are associated with _the likelihood of any reported smoking episode in the following day._ 
-
-**CODE FOR THIS MODULE:** `module-01.R`.
-
-# Set Up
-
-To start, we will simply run the following lines of code discussed in the _Getting Started_ module.
-
-```{r, message = FALSE, warning = FALSE}
-library(dplyr)
-library(lme4)
-```
-
-```{r, eval = FALSE}
-path_pns_input_data <- "C:/Users/jamieyap/Desktop/input_data"
-path_pns_output_data <- "C:/Users/jamieyap/Desktop/output_data"
-path_pns_staged_data <- "C:/Users/jamieyap/Desktop/staged_data"
-```
-
-```{r, message = FALSE, warning = FALSE}
-dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
-ema_item_names <- read.csv(file.path(path_pns_input_data, "ema_item_names.csv"), header = TRUE, na.strings = "")
-dat_big_merged <- read.csv(file.path(path_pns_input_data, "merged.csv"), header = TRUE, na.strings = "")
-```
-
-# Beginning Steps
-
-Note the need to sort according to ID and time before proceeding.
-
-```{r, message = FALSE, warning = FALSE}
-dat_big_merged_postquit <- dat_big_merged %>% arrange(id, time_unixts)
-```
 
 The file `ema_item_names.csv` contains the correspondence between the column names in `merged.csv` and the original column names in the codebook `PNS EMA Codebook 07202010.docx`. Inspection of the codebook will show that variable names referring to the same question may be identical across different types of EMAs. For example, the question 'I feel enthusiastic' is present in 8 out of the 9 kinds of EMA -- these 8 kinds of EMA capture responses to this question in a variable named `Affect1`. However, there may be questions which were posed to participants only within specific kinds of EMA. For example, the question 'I _felt_ enthusiastic' is present only in Post-Quit Already Slipped EMAs. As another example, the question 'Think about the cause of your slip. The cause is controllable by me.' is present in 2 out of the 9 kinds of EMA -- these 2 kinds of EMA capture responses to this question in a variable named `Attribution4`.
 
