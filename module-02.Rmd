@@ -1,17 +1,31 @@
 ---
-title: "Module 2"
+title: "Module 2:"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
 #  pdf_document:
-#    number_sections: FALSE
+#    number_sections: TRUE
 #    toc: true
 #    toc_depth: 1
   html_document:
-    number_sections: FALSE
+    number_sections: TRUE
     toc: true
     toc_depth: 1
     theme: flatly
     highlight: zenburn
+#  word_document:
+#    number_sections: TRUE
+#    toc: true
+#    toc_depth: 1
+urlcolor: magenta
+geometry: margin=1in
 ---
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE)
+```
 
+```{r, echo = FALSE, warning = FALSE}
+path_pns_input_data <- Sys.getenv("path_pns_input_data")
+path_pns_output_data <- Sys.getenv("path_pns_output_data")
+path_pns_figures <- Sys.getenv("path_pns_figures")
+```
