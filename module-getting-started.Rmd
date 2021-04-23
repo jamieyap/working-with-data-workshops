@@ -3,11 +3,11 @@ title: 'Module: Getting Started'
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
   pdf_document:
-    number_sections: FALSE
+    number_sections: true
     toc: true
     toc_depth: 1
   html_document:
-    number_sections: FALSE
+    number_sections: true
     theme: flatly
     highlight: zenburn
     toc: true
@@ -16,7 +16,6 @@ output:
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(tidy = TRUE)
-knitr::opts_chunk$set(fig.pos = 'H')
 ```
 
 ```{r, echo = FALSE, warning = FALSE}
@@ -89,8 +88,8 @@ Let's now read in the data files we will be using in Module 1. The following are
 * We set the value of `na.strings` to be a blank character, which tells `R` to treat such characters in a csv file as missing values. This is necessary since, by default, `R` treats cells coded as `NA` as missing values, i.e., by default, `na.strings = "NA"`, but all missing values in the curated data files are coded as blanks.
 
 ```{r, message = FALSE, warning = FALSE}
-dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
 dat_big_merged <- read.csv(file.path(path_pns_input_data, "merged.csv"), header = TRUE, na.strings = "")
+dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
 ema_item_names <- read.csv(file.path(path_pns_input_data, "ema_item_names.csv"), header = TRUE, na.strings = "")
 ```
 
