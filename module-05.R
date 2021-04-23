@@ -8,10 +8,6 @@ path_pns_input_data <- Sys.getenv("path_pns_input_data")
 # Specify location of output data files
 path_pns_output_data <- Sys.getenv("path_pns_output_data")
 
-# quit_dates_final.csv is a file containing masterlist of all participant IDs
-# Note that data from individuals who should be excluded from all data analysis (i.e., exclude = 1)
-# will NOT be present in ALL curated data files
-dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
 # merged.csv is a file containing information only from records attributed to Event C
 # this particular csv file merges several curated data files (named below) into one data file
 # - post_quit_already_slipped_ema.csv : curated data file containing variables only from the Post-Quit Already Slipped EMA questionnaire
@@ -26,6 +22,11 @@ dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"
 # - smoking.csv : curated data file containing variables that you would use to construct the smoking outcome
 dat_big_merged <- read.csv(file.path(path_pns_input_data, "merged.csv"), header = TRUE, na.strings = "")
 
+# quit_dates_final.csv is a file containing masterlist of all participant IDs
+# Note that data from individuals who should be excluded from all data analysis (i.e., exclude = 1)
+# will NOT be present in ALL curated data files
+dat_quit_dates <- read.csv(file.path(path_pns_input_data, "quit_dates_final.csv"), header = TRUE, na.strings = "")
+
 ###############################################################################
 # MODULE 1
 #
@@ -36,27 +37,14 @@ dat_big_merged <- read.csv(file.path(path_pns_input_data, "merged.csv"), header 
 ###############################################################################
 
 # Here, we will show you how to select the correct rows and columns within
-# the merged.csv file to end up with the 10 individual data files enumerated above
+# the merged.csv file to end up with the following individual data files:
+
+#- post_quit_random_ema.csv
+#- pre_quit_random_ema.csv
 
 # -----------------------------------------------------------------------------
-# First, extract rows which come from the following types of questionnaires:
-# - Post-Quit Already Slipped EMA questionnaire
-# - Post-Quit Random EMA questionnaire
-# - Post-Quit Urge EMA questionnaire
-# - Post-Quit About to Slip Part One EMA questionnaire
-# - Post-Quit About to Slip Part Two EMA questionnaire
+# First, extract rows which come from the Post-Quit Random EMA questionnaire
 # -----------------------------------------------------------------------------
-
-# How do we get from merged.csv to post_quit_already_slipped_ema.csv?
-dat_postquit_alreadyslipped_ema <- dat_big_merged %>%
-  # Select columns corresponding to participant ID and time variables; 
-  # select columns corresponding to items in Post-Quit Already Slipped EMA questionnaire
-  select(id:time_unixts, postquit_alreadyslipped_item_1:postquit_alreadyslipped_item_70) %>%
-  # Select those rows corresponding to when Post-Quit Already Slipped EMA was launched
-  filter(assessment_type == "Post-Quit Already Slipped") %>%
-  # Remember: order according to increasing participant ID
-  # and within each participant ID, according to increasing time 
-  arrange(id, time_unixts)
 
 # How do we get from merged.csv to post_quit_random_ema.csv?
 dat_postquit_random_ema <- dat_big_merged %>%
@@ -69,45 +57,8 @@ dat_postquit_random_ema <- dat_big_merged %>%
   # and within each participant ID, according to increasing time 
   arrange(id, time_unixts)
 
-# How do we get from merged.csv to post_quit_urge_ema.csv?
-dat_postquit_urge_ema <- dat_big_merged %>%
-  # Select columns corresponding to participant ID and time variables; 
-  # select columns corresponding to items in Post-Quit Urge EMA questionnaire
-  select(id:time_unixts, postquit_urge_item_1:postquit_urge_item_67) %>%
-  # Select those rows corresponding to when Post-Quit Urge EMA was launched
-  filter(assessment_type == "Post-Quit Urge") %>%
-  # Remember: order according to increasing participant ID
-  # and within each participant ID, according to increasing time 
-  arrange(id, time_unixts)
-
-# How do we get from merged.csv to post_quit_about_to_slip_part_one_ema.csv?
-dat_postquit_partone_ema <- dat_big_merged %>%
-  # Select columns corresponding to participant ID and time variables; 
-  # select columns corresponding to items in Post-Quit About to Slip Part One EMA questionnaire  
-  select(id:time_unixts, postquit_partone_item_1:postquit_partone_item_64) %>%
-  # Select those rows corresponding to when Post-Quit About to Slip Part One EMA was launched
-  filter(assessment_type == "Post-Quit About to Slip Part One") %>%
-  # Remember: order according to increasing participant ID
-  # and within each participant ID, according to increasing time 
-  arrange(id, time_unixts)
-
-# How do we get from merged.csv to post_quit_about_to_slip_part_two_ema.csv?
-dat_postquit_parttwo_ema <- dat_big_merged %>%
-  # Select columns corresponding to participant ID and time variables; 
-  # select columns corresponding to items in Post-Quit About to Slip Part Two EMA questionnaire
-  select(id:time_unixts, postquit_parttwo_item_1:postquit_parttwo_item_74) %>%
-  # Select those rows corresponding to when Post-Quit About to Slip Part Two EMA was launched
-  filter(assessment_type == "Post-Quit About to Slip Part Two") %>%
-  # Remember: order according to increasing participant ID
-  # and within each participant ID, according to increasing time 
-  arrange(id, time_unixts)
-
 # -----------------------------------------------------------------------------
-# Second, extract rows which come from the following types of questionnaires:
-# - Pre-Quit Random EMA questionnaire
-# - Pre-Quit Urge EMA questionnaire
-# - Pre-Quit Smoking Part One EMA questionnaire
-# - Pre-Quit Smoking Part Two EMA questionnaire
+# Second, extract rows which come from the Pre-Quit Random EMA questionnaire
 # -----------------------------------------------------------------------------
 
 # How do we get from merged.csv to pre_quit_random_ema.csv?
@@ -117,39 +68,6 @@ dat_prequit_random_ema <- dat_big_merged %>%
   select(id:time_unixts, prequit_random_item_1:prequit_random_item_67) %>%
   # Select those rows corresponding to when Pre-Quit Random EMA was launched
   filter(assessment_type == "Pre-Quit Random") %>%
-  # Remember: order according to increasing participant ID
-  # and within each participant ID, according to increasing time 
-  arrange(id, time_unixts)
-
-# How do we get from merged.csv to pre_quit_urge_ema.csv?
-dat_prequit_urge_ema <- dat_big_merged %>%
-  # Select columns corresponding to participant ID and time variables; 
-  # select columns corresponding to items in Pre-Quit Urge EMA questionnaire
-  select(id:time_unixts, prequit_urge_item_1:prequit_urge_item_67) %>%
-  # Select those rows corresponding to when Pre-Quit Urge EMA was launched
-  filter(assessment_type == "Pre-Quit Urge") %>%
-  # Remember: order according to increasing participant ID
-  # and within each participant ID, according to increasing time 
-  arrange(id, time_unixts)
-
-# How do we get from merged.csv to pre_quit_smoking_part_one_ema.csv?
-dat_prequit_partone_ema <- dat_big_merged %>%
-  # Select columns corresponding to participant ID and time variables; 
-  # select columns corresponding to items in Pre-Quit Smoking Part One EMA questionnaire
-  select(id:time_unixts, prequit_partone_item_1:prequit_partone_item_64) %>%
-  # Select those rows corresponding to when Pre-Quit Smoking Part One EMA was launched
-  filter(assessment_type == "Pre-Quit Smoking Part One") %>%
-  # Remember: order according to increasing participant ID
-  # and within each participant ID, according to increasing time 
-  arrange(id, time_unixts)
-
-# How do we get from merged.csv to pre_quit_smoking_part_two_ema.csv?
-dat_prequit_parttwo_ema <- dat_big_merged %>%
-  # Select columns corresponding to participant ID and time variables; 
-  # select columns corresponding to items in Pre-Quit Smoking Part Two EMA questionnaire
-  select(id:time_unixts, prequit_parttwo_item_1:prequit_parttwo_item_69) %>%
-  # Select those rows corresponding to when Pre-Quit Smoking Part Two EMA was launched
-  filter(assessment_type == "Pre-Quit Smoking Part Two") %>%
   # Remember: order according to increasing participant ID
   # and within each participant ID, according to increasing time 
   arrange(id, time_unixts)
@@ -172,25 +90,20 @@ dat_smoking <- dat_big_merged %>%
   # and within each participant ID, according to increasing time 
   arrange(id, time_unixts)
 
-# NOTE: By now, we have separated merged.csv into 10 individual data files.
-# The correspondence between the names of the data files we created above and 
-# the stand-alone csv files are enumerated below.
+# NOTE: By now, we have extracted smaller data files from merged.csv using 
+# the procedure above. The correspondence between the names of the data files 
+# we created above and the stand-alone csv files are enumerated below.
+#
+# - post_quit_random_ema.csv : dat_postquit_random_ema
+# - pre_quit_random_ema.csv : dat_prequit_random_ema
+# - smoking.csv : dat_smoking
+#
 # So, for example, if you executed the following line of code
 #
 #     write.csv(dat_random_ema, "post_quit_random_ema.csv", row.names = FALSE, na = "")
 #
 # An identical copy of post_quit_random_ema.csv will be generated
-
-# - post_quit_already_slipped_ema.csv : dat_postquit_alreadyslipped_ema
-# - post_quit_random_ema.csv : dat_postquit_random_ema
-# - post_quit_urge_ema.csv : dat_postquit_urge_ema
-# - post_quit_about_to_slip_part_one_ema.csv : dat_postquit_partone_ema
-# - post_quit_about_to_slip_part_two_ema.csv : dat_postquit_parttwo_ema
-# - pre_quit_random_ema.csv : dat_prequit_random_ema
-# - pre_quit_urge_ema.csv : dat_prequit_urge_ema
-# - pre_quit_smoking_part_one_ema.csv : dat_prequit_partone_ema
-# - pre_quit_smoking_part_two_ema.csv : dat_prequit_parttwo_ema
-# - smoking.csv : dat_smoking
+#
 
 
 ###############################################################################
@@ -471,10 +384,6 @@ for(i in 1:total_participant_ids){
 # Finally, order according to increasing participant ID
 # and within each participant ID, according to increasing time 
 dat_analysis <- dat_analysis %>% arrange(id, time_unixts)
-
-
-
-
 
 
 ###############################################################################
