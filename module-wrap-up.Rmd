@@ -1,0 +1,66 @@
+---
+title: "Workshop Wrap Up"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: 
+  pdf_document:
+    extra_dependencies: ["float"]
+    number_sections: True
+    toc: true
+    toc_depth: 1
+#  html_document:
+#    number_sections: TRUE
+#    toc: true
+#    toc_depth: 1
+#    theme: flatly
+#    highlight: zenburn
+#  word_document:
+#    number_sections: TRUE
+#    toc: true
+#    toc_depth: 1
+urlcolor: magenta
+geometry: margin=1in
+header-includes:
+   \usepackage[dvipsnames]{xcolor}
+   \usepackage{pifont}
+   \usepackage{fontenc}
+   \usepackage{anyfontsize}
+   \usepackage{inputenc}
+---
+
+\vspace{0.75cm}
+
+# Recap
+
+When we kicked off the workshop, we begun with the overarching goal of taking away the following skills from the workshop:
+
+* the ability to correctly interpret columns in the curated datasets
+* the ability to correctly identify rows which need to be included/excluded when working on *formulating* one's scientific question of interest
+
+Modules 1 - 5 showed more concretely how we are able to accomplish these goals. Much more, we have also:
+
+* discussed how the design of the data collection process will raise nuances one needs to consider when constructing Dependent Variables and Independent Variables. Indeed one cannot construct Dependent Variables and Independent Variables correctly without simultaneous consideration of the data collection process.
+
+* illustrated one approach to constructing the Dependent Variable. The approach uses scientific considerations (i.e., our motivating scientific question) and practical considerations (i.e., the data collection design).
+
+* provided a tool (i.e., code) one may used to create a visual snapshot of the number of EMAs and time between EMAs within the data file `dat_smoking` -- the data file which we will be using to construct our Dependent Variable. The tool may be used to create visual snapshots that zoom in or zoom out of specific moments of time during the study period.
+
+
+# Next Steps
+
+* Workshop participants will be asked to complete a workshop evaluation survey.
+
+# Parting Points
+
+* What is a question you have about what we did *not* cover today?
+
+
+\sffamily\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{red!5}{\color{black}
+\begin{minipage}[0.30in]{6.3in}
+\begin{center} 
+'To sum it all up, I feel we are just as confused as ever in some ways, but I believe we are confused at a \textit{higher level} and about \textit{more important things}.' -- David A. Peoples
+\end{center}
+\end{minipage}}
+
+
+
