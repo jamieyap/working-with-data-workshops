@@ -3,6 +3,7 @@ title: "Module 1: Anatomy of `merged.csv`"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
   pdf_document:
+    extra_dependencies: ["float"]
     number_sections: TRUE
     toc: true
     toc_depth: 1
@@ -22,21 +23,22 @@ geometry: margin=1in
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(tidy = FALSE)
+knitr::opts_chunk$set(tidy = FALSE, fig.pos = 'H')
 ```
 
-```{r, echo = FALSE, warning = FALSE}
+```{r echo=FALSE, warning=FALSE}
 path_pns_input_data <- Sys.getenv("path_pns_input_data")
 path_pns_output_data <- Sys.getenv("path_pns_output_data")
 path_pns_figures <- Sys.getenv("path_pns_figures")
 ```
 
-The PNS documentation (e.g., see \url{https://github.com/jamieyap/PNS}) contains information on study design, how the data collected differed from the intended design, and how such deviations were addressed in the process of constructing the curated datasets. More than a mere collection of facts, the documentation seeks to organize these diverse set of information into a coherent story, allowing end-users of the curated datasets to more quickly (1) see to what extent is it feasible to investigate a particular scientific question using the data on-hand, and (2) see to what extent is it feasible to consider potential advancements in computational methodology.
+\vspace{0.75cm}
 
-**GOAL:** By the end of this module, you will be able to:
+**MODULE 1 GOAL:** By the end of this module, you will be able to:
 
-* Correctly interpret columns in the curated datasets.
-* Correctly identify rows which need to be included/excluded when working on (1) and/or (2) described above.
+* Identify which rows and columns in the `merged.csv` file to select when one wishes to use responses from Pre-/Post- Quit Random EMA Questionnaires as Independent Variables (IV's)
+
+* Identify which rows and columns in the `merged.csv` file to select when cigarette smoking behavior is the primary Dependent Variable (DV) of interest.
 
 # What do the rows represent?
 
@@ -74,19 +76,19 @@ knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
 
 # What information are *not* represented in the rows of `merged.csv`?
 
-Recall that out of the 200 participants enrolled in the PNS study, 37 participants will be excluded from all data analyses. Any responses provided by these 37 participants during the conduct of the study have been excluded from `merged.csv`. Hence, none of the rows `merged.csv` will contain any information from these 37 participants. The IDs of these participants can be referenced in the file `quit_dates_final.csv`. In the `quit_dates_final.csv` file, these participants can be identified by the indicator variable `exclude`, which is equal to 1 if the ID belongs to one of these 37 participants, and equal to 0, if the ID dies not belong to one of these 37 participants.
+Recall that out of the 200 participants enrolled in the PNS study, 37 participants will be excluded from all data analyses. Any responses provided by these 37 participants during the conduct of the study have been excluded from `merged.csv`. Hence, none of the rows `merged.csv` will contain any information from these 37 participants. The IDs of these participants can be referenced in the file `quit_dates_final.csv`. In the `quit_dates_final.csv` file, these participants can be identified by the indicator variable `exclude`, which is equal to 1 if the ID belongs to one of these 37 participants, and equal to 0, if the ID does not belong to one of these 37 participants.
 
 # What do the columns represent?
 
 The columns suffixed by `_item_XX` refer to items within EMA questionnaires...
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
+```{r, echo = FALSE, fig.pos = 'H', fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
 knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
 ```
 
 ...and we can tell
 
-* which EMA questionnaire the column is applicable to (e.g., `postquit_alreadyslipped_item_7` represents an item in the Post-Quit Already Slipped Questionnaire; `postquit_random_item_7` represents an item in the Post-Quit Random EMA Questionnaire)
+* which EMA questionnaire the column is applicable to by the prefix of the column name (e.g., `postquit_alreadyslipped_item_7` represents an item in the Post-Quit Already Slipped Questionnaire; `postquit_random_item_7` represents an item in the Post-Quit Random EMA Questionnaire)
 * what were the original responses provided by participants to the questionnaires; values under the columns suffixed by `_item_XX` were left unchanged from the raw datasets
 
 The curated smoking variables ...
@@ -164,6 +166,8 @@ Let's see how these concepts are used as we break apart `merged.csv` into bite-s
 # Read in data file
 dat_big_merged <- read.csv(file.path(path_pns_input_data, "merged.csv"), 
                            header = TRUE, 
+                           # required: let R know that missing values 
+                           # are represented as blanks 
                            na.strings = "")
 
 # View the first few rows of the data file
@@ -195,6 +199,9 @@ dat_prequit_random_ema <- dat_big_merged %>%
   # and within each participant ID, according to increasing time 
   arrange(id, time_unixts)
 ```
+
+The file `ema_item_names.csv` can be inspected to determine the total number of items that exist in each type of EMA Questionnaire. More specifically, one may inspect the column `name_new`: the largest number `XX` in the suffix `item_XX` for a particular `assessment_type` will be the total number of items that exist in the EMA Questionnaire. In the above code snippet, `postquit_random_item_1:postquit_random_item_67` tells `R` to select those columns in `dat_big_merged` corresponding to items 1, 2, 3, ..., 67 in the Post-Quit Random EMA Questionnaire (i.e., from item 1 all the way through item 67, the last item in this type of EMA Questionnaire). On the other hand, the code snippet `prequit_random_item_1:prequit_random_item_67` tells `R` to select those columns in `dat_big_merged` corresponding to items 1, 2, 3, ..., 67 in the Pre-Quit Random EMA Questionnaire (i.e., from item 1 all the way through item 67, the last item in this type of EMA Questionnaire). 
+
 
 Although we anticipate that the vast majority of papers will exclusively use responses from Pre-/Post- Quit Random EMA Questionnaires as Independent Variables (IV's), there may be situations where one may want to consider using responses from other kinds of EMA questionnaires. For example, responses from Pre-/Post- Quit Urge EMA Questionnaires when craving (rather than smoking) is the primary Dependent Variable (DV) of interest. In such situations, we may apply a similar logic as the code snippet above to obtain those rows and columns corresponding to Pre-/Post- Quit Urge EMA Questionnaires. An example code snippet applying the logic for Pre-/Post- Quit Urge EMA Questionnaires is displayed below.
 
@@ -240,8 +247,5 @@ dat_smoking <- dat_big_merged %>%
   # and within each participant ID, according to increasing time 
   arrange(id, time_unixts)
 ```
-
-
-
 
 
