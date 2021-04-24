@@ -19,9 +19,8 @@ output:
 #    toc_depth: 1
 urlcolor: magenta
 geometry: margin=1in
-
 header-includes:
-   \usepackage{xcolor} 
+   \usepackage[dvipsnames]{xcolor}
    \usepackage{pifont}
    \usepackage{fontenc}
    \usepackage{anyfontsize}

@@ -19,6 +19,8 @@ output:
 #    toc_depth: 1
 urlcolor: magenta
 geometry: margin=1in
+header-includes:
+   \usepackage[dvipsnames]{xcolor} 
 ---
 
 
@@ -248,4 +250,10 @@ dat_smoking <- dat_big_merged %>%
   arrange(id, time_unixts)
 ```
 
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{red!5}{\color{black}
+\begin{minipage}[0.30in]{6.3in}
+\begin{center}BREAK: Any questions?\end{center}
+\end{minipage}}
 

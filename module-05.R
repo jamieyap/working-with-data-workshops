@@ -153,8 +153,8 @@ subset_dat_prequit_random_ema <- dat_prequit_random_ema %>%
 # to calling rbind()
 dat_analysis <- rbind(subset_dat_postquit_random_ema, subset_dat_prequit_random_ema)
 
-# Remember: order according to increasing participant ID
-# and within each participant ID, according to increasing time 
+# Remember: order according to increased participant ID
+# and within each participant ID, according to increased time 
 dat_analysis <- dat_analysis %>% arrange(id, time_unixts)
 
 # -----------------------------------------------------------------------------
@@ -173,7 +173,7 @@ dat_analysis <- dat_analysis %>%
   # for a particular participant
   group_by(id) %>%
   # When did the participant begin responding to the next EMA?
-  # If there is no EMA that follows the current EMA, we will set time_unixts_plusone 
+  # If there is no EMA that follows the current EMA,  
   # we will initially set time_unixts_plusone to a missing value
   mutate(time_unixts_plusone = c(tail(time_unixts, n=-1), NA)) %>%
   # If there is no EMA that follows the current EMA, we will set time_unixts_plusone 
