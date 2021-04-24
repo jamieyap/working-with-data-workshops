@@ -212,7 +212,7 @@ dat_analysis <- dat_analysis %>%
 # -----------------------------------------------------------------------------
 
 choose_idx <- 38 # e.g., if this is 2, then we are selecting the 2nd participant ID in the list
-xlim_min <- 0 # # Minimum number of days since 12AM of start of study date
+xlim_min <- 0 # Minimum number of days since 12AM of start of study date
 xlim_max <- 28 # Maximum number of days since 12AM of start of study date
 
 # -----------------------------------------------------------------------------

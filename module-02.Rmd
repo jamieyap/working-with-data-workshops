@@ -144,6 +144,8 @@ dat_analysis <- rbind(subset_dat_postquit_random_ema, subset_dat_prequit_random_
 
 # Creating New Time Variables using Existing Time Variables in the Data Files
 
+**Reference file with R code:** `module-02.R`
+
 ## Step 1
 
 
