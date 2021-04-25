@@ -1,5 +1,5 @@
 ---
-title: "Module 5"
+title: "Module 5: Modeling and Hypothesis Testing"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
   pdf_document:
@@ -24,7 +24,7 @@ header-includes:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(tidy = FALSE)
+knitr::opts_chunk$set(tidy = FALSE, fig.pos = 'H')
 ```
 
 ```{r, echo = FALSE, warning = FALSE}
@@ -34,5 +34,189 @@ path_pns_figures <- Sys.getenv("path_pns_figures")
 ```
 
 
+\vspace{0.75cm}
+
+**MODULE 5 GOAL:** By the end of this module, you will be able to:
+
+* Identify which rows to select in a 'Main Analysis' and a 'Sensitivity Analysis'.
+* See an example of how the dataset created using the process discussed in Modules 1-4 can be used to test hypothesis.
+* Through a live demo, know what to expect when using `module-05.R` independently.
+
+
+#  Scientific Question
+
+For convenience, let's display the scientific question we introduced in an earlier module.
+
+**SCIENTIFIC QUESTION 1:** On average, is self-efficacy *at the current time point* associated with *the proximal occurrence of cigarette smoking* during the post-quit period?
+
+We note that the time variables we constructed in earlier modules also allow us to test whether the above associative effect varies with time, i.e.,
+
+**SCIENTIFIC QUESTION 2:** Does association of self-efficacy *at the current time point* with *the proximal occurrence of cigarette smoking* vary across time during the post-quit period?
+
+# Dataset for Analysis
+
+Let's now see how the Independent Variables, Dependent Variables, and Time Variables we have grown acquainted with in Modules 1-4 now come together into a dataset we may utilize to investigate the scientific questions above.
+
+The dataset we now have (i.e., `dat_analysis` from Module 4) contains the following columns...
+
+* `id`
+* `sensitivity` 
+* `selfeff` 
+* `num_days_elapsed_since_quit`
+* `num_hrs_elapsed_since_previous_ema`
+* `count_within_bounds`
+
+... and the information in these columns may be visualized in relation to each other.
+
+```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Timeline'}
+knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
+```
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{red!5}{\color{black}
+\begin{minipage}[0.30in]{6.3in}
+\begin{center}BREAK: Any questions?\end{center}
+\end{minipage}}
+
+
+# Models for the Dependent Variable
+
+
+**In terms of variables in `dat_analysis` ...**
+
+
+MODEL FOR SCIENTIFIC QUESTION 1:
+
+$$\mathrm{log}\left(E\left\{\frac{\text{count\_within\_bounds}}{\text{num\_hrs\_elapsed\_since\_previous\_ema}}\right\}\right)  = \beta_0 + \beta_1 \text{selfeff}$$
+
+MODEL FOR SCIENTIFIC QUESTION 2:
+
+$$
+\begin{aligned}
+\mathrm{log}\left(E\left\{\frac{\text{count\_within\_bounds}}{\text{num\_hrs\_elapsed\_since\_previous\_ema}}\right\}\right)  &= \beta_0 + \beta_1 \text{selfeff} \\
+&+ \beta_2 \text{num\_days\_elapsed\_since\_quit} \\
+&+ \beta_3 (\text{num\_days\_elapsed\_since\_quit} \times \text{selfeff})
+\end{aligned}
+$$
+
+**In terms of math ...**
+
+MODEL FOR SCIENTIFIC QUESTION 1:
+
+$$\mathrm{log}\left(E\left\{\frac{Y_{i,t_j}}{L_{i,t_j}}\right\}\right) = \beta_0 + \beta_1 X_{i,t_j}$$
+
+MODEL FOR SCIENTIFIC QUESTION 2:
+
+$$\mathrm{log}\left(E\left\{\frac{Y_{i,t_j}}{L_{i,t_j}}\right\}\right) = \beta_0 + \beta_1 X_{i,t_j} + \beta_2 D_{i,t_j} + \beta_3 (D_{i,t_j} \times X_{i,t_j})$$
+
+
+# Hypothesis Testing
+
+**Reference file with R code:** `module-05.R`
+
+## Step 1
+
+```{r, eval = FALSE}
+dat_analysis <- dat_analysis %>%
+  select(id, 
+         sensitivity, 
+         selfeff, 
+         num_days_elapsed_since_quit,
+         num_hrs_elapsed_since_previous_ema,
+         count_within_bounds)
+
+# Transform hours elapsed into log-scale
+dat_analysis$logged_hrs_elapsed <- log(dat_analysis$num_hrs_elapsed_since_previous_ema)
+
+# Round up totals;
+# For example, 0.5 will be rounded up to 1; 1.5 will be rounded up to 2, etc.
+dat_analysis$roundedup_count_within_bounds <- as.integer(ceiling(dat_analysis$count_within_bounds))
+```
+
+## Step 2
+
+```{r, eval = FALSE}
+
+# Create a new data frame, which is essentially dat_analysis copied
+dat_main_analysis <- dat_analysis
+
+# Now, using dat_main_analysis, take those rows which will be included 
+# in Sensitivity Analysis. In other words, drop all those rows which should
+# be excluded from Sensitivity Analysis
+dat_sensitivity_analysis <- dat_main_analysis %>% filter(sensitivity == 1)
+```
+
+
+We note that we will be using identical models for 'Main Analysis' and 'Sensitivity Analysis'. Both types of analyses only differ with respect to which participants will be used to estimate the two models discussed above:
+
+* In 'Main Analysis', all participants in `dat_analysis` will be used to estimate both models
+* In 'Sensitivity Analysis', only those participants in `dat_analysis` having `sensitivity = 1` will be used to estimate both models
+
+## Step 3
+
+In the remaining steps, we will do a complete-case analysis. Rows having missing values in any of the dependent variables or independent variables will be omitted. In your analysis, you would have to consider how to address missing data in both of these variables, e.g., via an imputation procedure prior to running `glmer`.
+
+```{r, eval = FALSE}
+# Estimate coefficients of the model using glmer
+fit_main_1 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) 
+                                                    + 1 + selfeff 
+                                                    + (1 | id), 
+                    data = dat_main_analysis, 
+                    family = poisson(link="log"),
+                    na.action = na.omit)
+```
+
+## Step 4
+
+```{r, eval = FALSE}
+# Estimate coefficients of the model using glmer
+fit_sensitivity_1 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) 
+                                                           + 1 + selfeff 
+                                                           + (1 | id), 
+                           data = dat_sensitivity_analysis, 
+                           family = poisson(link="log"),
+                           na.action = na.omit)
+```
+
+
+## Step 5
+
+A similar logic to Steps 3 and 4 above may be used to estimate the model for Scientific Question 2. 
+
+```{r, eval = FALSE}
+# Estimate coefficients of the model using glmer
+fit_main_2 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) 
+                                                    + 1 + selfeff 
+                                                    + I(num_days_elapsed_since_quit/100) 
+                                                    + selfeff:I(num_days_elapsed_since_quit/100) 
+                                                    + (1 | id),
+                    data = dat_main_analysis, 
+                    family = poisson(link="log"),
+                    na.action = na.omit)
+```
+
+## Step 6
+
+
+```{r, eval = FALSE}
+# Estimate coefficients of the model using glmer
+fit_sensitivity_2 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_elapsed) 
+                                                           + 1 + selfeff 
+                                                           + I(num_days_elapsed_since_quit/100) 
+                                                           + selfeff:I(num_days_elapsed_since_quit/100) 
+                                                           + (1 | id), 
+                           data = dat_sensitivity_analysis, 
+                           family = poisson(link="log"),
+                           na.action = na.omit)
+```
+
+
+# Live Demo of `module-05.R`
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{red!5}{\color{black}
+\begin{minipage}[0.30in]{6.3in}
+\begin{center}BREAK: Any questions?\end{center}
+\end{minipage}}
 
 

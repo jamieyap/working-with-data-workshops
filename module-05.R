@@ -393,6 +393,14 @@ dat_analysis <- dat_analysis %>% arrange(id, time_unixts)
 #
 ###############################################################################
 
+dat_analysis <- dat_analysis %>%
+  select(id, 
+         sensitivity, 
+         selfeff, 
+         num_days_elapsed_since_quit,
+         num_hrs_elapsed_since_previous_ema,
+         count_within_bounds)
+
 # Transform hours elapsed into log-scale
 dat_analysis$logged_hrs_elapsed <- log(dat_analysis$num_hrs_elapsed_since_previous_ema)
 

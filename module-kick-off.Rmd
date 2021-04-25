@@ -53,6 +53,8 @@ The workshop seeks to complement the PNS documentation. By the end of this works
 
 * Have a pen and paper on hand and get ready to doodle together as we progress through the modules.
 
+* During live demos of R code (Modules 3 and 5), workshop participants are encouraged to use break points to initiate discussion focusing on the logic, rather than syntax, employed in the code.
+
 # What to Expect
 
 **WORKSHOP KICK OFF**
