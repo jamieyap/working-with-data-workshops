@@ -1,5 +1,5 @@
 ---
-title: "Module 4"
+title: "Module 4: Set-Up of Dependent Variable"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
   pdf_document:
@@ -24,7 +24,7 @@ header-includes:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(tidy = FALSE)
+knitr::opts_chunk$set(tidy = FALSE, fig.pos = 'H')
 ```
 
 ```{r, echo = FALSE, warning = FALSE}
@@ -32,3 +32,99 @@ path_pns_input_data <- Sys.getenv("path_pns_input_data")
 path_pns_output_data <- Sys.getenv("path_pns_output_data")
 path_pns_figures <- Sys.getenv("path_pns_figures")
 ```
+
+
+\vspace{0.75cm}
+
+**MODULE 4 GOAL:** By the end of this module, you will be able to:
+
+* Learn the logic of constructing the Dependent Variable using scientific considerations (i.e., our motivating scientific question) and practical considerations (i.e., the data collection design).
+
+
+#  Scientific Question
+
+For convenience, let's display the scientific question we introduced in an earlier module.
+
+**SCIENTIFIC QUESTION:** On average, is self-efficacy *at the current time point* associated with *the proximal occurrence of cigarette smoking* during the post-quit period?
+
+
+# Implementation
+
+**Reference file with R code:** `module-04.R`
+
+We will zoom in on specific sections within the implementation in `module-04.R`.
+
+An outer loop goes through each participant. For each participant, the inner loop goes through each of their rows in `dat_analysis`. Recall that, at this point, only Random EMAs having *any* response (i.e., `with_any_response=1`) are included in `dat_analysis`. Hence, for a particular participant, `total_random_ema` will be the total number of Random EMAs for which the participant provided *any* response.
+
+```{r, eval = FALSE}
+for(i in 1:total_participant_ids){
+  
+  # More code here
+  
+  for(j in 1:total_random_ema){
+    
+    # More code here
+    
+  }
+}
+```
+
+The inner loop calculates `count_within_bounds`, our Dependent Variable.
+
+```{r, eval = FALSE}
+  for(j in 1:total_random_ema){
+    current_lower_bound <- all_lower_bound[j]
+    current_upper_bound <- all_upper_bound[j]
+    
+    # How many EMAs were launched between the two Random EMAs we
+    # are looking at now?
+    dat_within_bounds <- current_dat_smoking %>% 
+      # Note the use of '>' instead of '>=' when checking against left end point
+      # We do not include the number of reported cigarettes smoked in the left end point 
+      # However, we will include the number of reported cigarettes smoked in the right end point
+      filter((time_unixts > current_lower_bound) & (time_unixts <= current_upper_bound))
+    
+    number_within_bounds <- nrow(dat_within_bounds)
+    # Only proceed with further calculations if we have at least one EMA
+    if(number_within_bounds > 0){
+      number_missing <- sum(is.na(dat_within_bounds$smoking_qty))
+      # Only proceed with further calculations if there is no missing value in smoking_qty
+      if(number_missing == 0){
+        current_count_within_bounds <- sum(dat_within_bounds$smoking_qty)
+      } # Mark end of IF STATEMENT
+    } # Mark end of IF STATEMENT
+    
+    current_dat_analysis$count_within_bounds[j] <- current_count_within_bounds
+  } # Mark end of FOR LOOP over Random EMAs having with_any_response=1
+```
+
+**What are the bounds?**
+
+```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
+knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
+```
+
+**Which EMAs within these bounds should we *not* use?**
+
+```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
+knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
+```
+
+
+**When may missing values come about in our Dependent Variable `count_within_bounds`?**
+
+```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
+knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
+```
+
+
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{red!5}{\color{black}
+\begin{minipage}[0.30in]{6.3in}
+\begin{center}BREAK: Any questions?\end{center}
+\end{minipage}}
+
+
+
+

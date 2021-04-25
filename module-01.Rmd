@@ -57,10 +57,17 @@ knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
 * whether the participant responded *any* item in the EMA questionnaire (`with_any_response`)
 * if the participant responded to *any* item in the EMA questionnaire, when they began providing their responses (`begin_unixts`)
 
-We say 'successfully launched' to emphasize that there may be prolonged periods of time when no EMA questionnaires of any type were launched (e.g., due to software issue or when phone was switched off). Hence, during such periods of time, no EMA questionnaires will be displayed on the participant's smartphone. Correspondingly, when performing a visual inspection of the data, such periods of time may be represented by a prolonged time gap between two consecutive EMA questionnaires in the `merged.csv` file.
+**Successfully launched?**
+
+We say '*successfully* launched' to emphasize that there may be prolonged periods of time when no EMA questionnaires of any type were launched (e.g., due to software issue or when phone was switched off). Hence, during such periods of time, no EMA questionnaires will be displayed on the participant's smartphone. Correspondingly, when performing a visual inspection of the data, such periods of time may be represented by a prolonged time gap between two consecutive EMA questionnaires in the `merged.csv` file.
+
+**Having any response?**
+
+We say 'having *any* response' when speaking of the variable `with_any-response` since it is possible for participants to partially complete EMA Questionnaires. Hence, fully completed and partially completed EMA Questionnaires will have `with_any_response=1` but EMA Questionnaires having no response whatsoever to all items will have `with_any_response=0`.
 
 Additionally, we note that although it may appear unnecessary to have an indicator for whether the participant responded to Self-Initiated EMA Questionnaires (i.e., the variable `with_any_response` was constructed for all types of EMA Questionnaires), it is possible (but uncommon) for a participant to eventually decide to ignore Self-Initiated EMA Questionnaires (i.e., they perform a button press, and the button press was followed by the launching of an EMA Questionnaire, but for whatever reason, the participant decided to not follow through with responding to the EMA Questionnaire).
 
+**Which EMA came first?**
 
 We also need a way to chronologically order EMAs. While completed and partially completed EMAs may have a timestamp for Begin Time (`begin_unixts`), EMAs which have no response will not have a timestamp for Begin Time. Even so, we may still be able to chronologically order EMAs if we consider timestamps for Delivered Time (`delivered_unixts`) as well. More specifically, to chronologically order EMAs within `merged.csv`, we may utilize the time variable Aligned Time (`time_unixts`) which is equal to Begin Time (`begin_unixts`) if the participant responded to the EMA (`with_any_response=1`) and equal to Delivered Time (`delivered_unixts`) if the participant did not respond to the EMA (`with_any_response=0)`. 
 

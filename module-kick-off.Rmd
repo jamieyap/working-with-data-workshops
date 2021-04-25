@@ -65,7 +65,7 @@ The workshop seeks to complement the PNS documentation. By the end of this works
 
 **\textcolor{Dandelion}{COFFEE/TEA/BAGEL BREAK: 15 minutes}**
 
-* MODULE 4: Set-Up of Dependent Variables
+* MODULE 4: Set-Up of Dependent Variable
 * MODULE 5: Modeling and Hypothesis Testing
 
 **\textcolor{Dandelion}{COFFEE/TEA/BAGEL BREAK: 5 minutes}**

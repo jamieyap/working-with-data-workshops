@@ -87,7 +87,7 @@ knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
 
 MODEL FOR SCIENTIFIC QUESTION 1:
 
-$$\mathrm{log}\left(E\left\{\frac{\text{count\_within\_bounds}}{\text{num\_hrs\_elapsed\_since\_previous\_ema}}\right\}\right)  = \beta_0 + \beta_1 \text{selfeff}$$
+$$\mathrm{log}\left(E\left\{\frac{\text{count\_within\_bounds}}{\text{num\_hrs\_elapsed\_since\_previous\_ema}}\right\}\right)  = \beta_0 + \beta_1 \text{selfeff} + \nu_i$$
 
 MODEL FOR SCIENTIFIC QUESTION 2:
 
@@ -95,7 +95,8 @@ $$
 \begin{aligned}
 \mathrm{log}\left(E\left\{\frac{\text{count\_within\_bounds}}{\text{num\_hrs\_elapsed\_since\_previous\_ema}}\right\}\right)  &= \beta_0 + \beta_1 \text{selfeff} \\
 &+ \beta_2 \text{num\_days\_elapsed\_since\_quit} \\
-&+ \beta_3 (\text{num\_days\_elapsed\_since\_quit} \times \text{selfeff})
+&+ \beta_3 (\text{num\_days\_elapsed\_since\_quit} \times \text{selfeff}) \\
+&+ \nu_i
 \end{aligned}
 $$
 
@@ -103,11 +104,11 @@ $$
 
 MODEL FOR SCIENTIFIC QUESTION 1:
 
-$$\mathrm{log}\left(E\left\{\frac{Y_{i,t_j}}{L_{i,t_j}}\right\}\right) = \beta_0 + \beta_1 X_{i,t_j}$$
+$$\mathrm{log}\left(E\left\{\frac{Y_{i,t_j}}{L_{i,t_j}}\right\}\right) = \beta_0 + \beta_1 X_{i,t_j} + \nu_i$$
 
 MODEL FOR SCIENTIFIC QUESTION 2:
 
-$$\mathrm{log}\left(E\left\{\frac{Y_{i,t_j}}{L_{i,t_j}}\right\}\right) = \beta_0 + \beta_1 X_{i,t_j} + \beta_2 D_{i,t_j} + \beta_3 (D_{i,t_j} \times X_{i,t_j})$$
+$$\mathrm{log}\left(E\left\{\frac{Y_{i,t_j}}{L_{i,t_j}}\right\}\right) = \beta_0 + \beta_1 X_{i,t_j} + \beta_2 D_{i,t_j} + \beta_3 (D_{i,t_j} \times X_{i,t_j}) + \nu_i$$
 
 
 # Hypothesis Testing
@@ -181,7 +182,15 @@ fit_sensitivity_1 <- glmer(roundedup_count_within_bounds ~ offset(logged_hrs_ela
 
 ## Step 5
 
-A similar logic to Steps 3 and 4 above may be used to estimate the model for Scientific Question 2. 
+A similar logic to Steps 3 and 4 above may be used to estimate the model for Scientific Question 2. To help with convergence of the estimation process, we will rescale the variable `num_days_elapsed_since_quit` prior to estimation (try removing the division by 100!). This rescaling has the effect of estimating the following model:
+
+$$
+\begin{aligned}
+\mathrm{log}\left(E\left\{\frac{\text{count\_within\_bounds}}{\text{num\_hrs\_elapsed\_since\_previous\_ema}}\right\}\right)  &= \beta_0 + \beta_1 \text{selfeff} \\
+&+ \beta_2 \frac{\text{num\_days\_elapsed\_since\_quit}}{100} \\
+&+ \beta_3 \left(\frac{\text{num\_days\_elapsed\_since\_quit}}{100} \times \text{selfeff}\right)
+\end{aligned}
+$$
 
 ```{r, eval = FALSE}
 # Estimate coefficients of the model using glmer
