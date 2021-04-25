@@ -66,17 +66,21 @@ We then ask,
 
 The question 'I *am* confident in my ability NOT TO SMOKE' is present in 8 out of the 9 types of EMA Questionnaires (i.e., all types of Questionnaires except for the Post-Quit Already Slipped EMA Questionnaire).
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 * Among the various types of EMA Questionnaires, which EMA Questionnaires may be utilized for our Independent Variable?
 
 In most cases, we will utilize responses in Post-/Pre- Quit Random EMA Questionnaires for our Independent Variables.
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 \fboxrule.1em\fboxsep1em
 \fcolorbox{black}{red!5}{\color{black}
@@ -115,6 +119,12 @@ subset_dat_prequit_random_ema <- dat_prequit_random_ema %>%
   rename(selfeff = prequit_random_item_8)
 ```
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
 
 The correspondence between the column names in `merged.csv` and the original column names in the codebook `PNS EMA Codebook 07202010.docx` can also be seen in `ema_item_names.csv` by comparing the `name_new` column against the `name_codebook` column. 
 
@@ -134,6 +144,12 @@ In the code snippet above, we have used the `ema_item_names.csv` file to pick ou
 # to calling rbind()
 dat_analysis <- rbind(subset_dat_postquit_random_ema, subset_dat_prequit_random_ema)
 ```
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 \fboxrule.1em\fboxsep1em
 \fcolorbox{black}{red!5}{\color{black}
@@ -167,7 +183,6 @@ dat_analysis <- dat_analysis %>% arrange(id, time_unixts)
 ```{r, eval = FALSE}
 # Using dat_analysis:
 # - Calculate number of hours elapsed between the current EMA and the next EMA
-# - Calculate number of days elapsed since the beginning of post-quit period
 
 dat_analysis <- dat_analysis %>%
   # The group_by() function is needed to ensure that we do not accidentally 
@@ -187,6 +202,20 @@ dat_analysis <- dat_analysis %>%
   mutate(num_secs_elapsed_since_previous_ema = time_unixts_plusone - time_unixts) %>%
   # Now, make a conversion from seconds to hours
   mutate(num_hrs_elapsed_since_previous_ema = num_secs_elapsed_since_previous_ema/(60*60))
+```
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
+## Step 3
+
+```{r, eval = FALSE}
+# Using dat_analysis:
+# - Calculate number of days elapsed since the beginning of post-quit period
+# - Calculate number of days elapsed since the start of the study
 
 dat_analysis <- dat_analysis %>%
   # How many seconds elapsed between the current EMA and Quit Date?
@@ -205,6 +234,13 @@ dat_analysis <- dat_analysis %>%
   mutate(num_hrs_elapsed_since_start_study = num_secs_elapsed_since_start_study/(60*60)) %>%
   mutate(num_days_elapsed_since_start_study = num_hrs_elapsed_since_start_study/24)
 ```
+
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 
 \fboxrule.1em\fboxsep1em

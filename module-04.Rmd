@@ -69,6 +69,13 @@ for(i in 1:total_participant_ids){
 }
 ```
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
+
 The inner loop calculates `count_within_bounds`, our Dependent Variable.
 
 ```{r, eval = FALSE}
@@ -100,22 +107,30 @@ The inner loop calculates `count_within_bounds`, our Dependent Variable.
 
 **What are the bounds?**
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
 
 **Which EMAs within these bounds should we *not* use?**
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
 
 
 **When may missing values come about in our Dependent Variable `count_within_bounds`?**
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 
 

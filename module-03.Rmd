@@ -44,6 +44,8 @@ path_pns_figures <- Sys.getenv("path_pns_figures")
 
 ## Step 1
 
+We begin with the `dat_smoking` data file we created in earlier modules.
+
 ```{r, eval = FALSE}
 # How to we get from merged.csv to smoking.csv?
 dat_smoking <- dat_big_merged %>% 

@@ -46,9 +46,11 @@ path_pns_figures <- Sys.getenv("path_pns_figures")
 
 Each row of `merged.csv` represents a successfully launched EMA questionnaire during the study...
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 ...and we can tell
 
@@ -73,15 +75,19 @@ We also need a way to chronologically order EMAs. While completed and partially 
 
 Let us place markers chronologically on a timeline. These markers represent Aligned Time for Random EMA (triangles) and Urge EMA (squares).
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Visual Diagram for Toy Dataset: A Timeline'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 Next, let us draw an identical timeline directly on top to visualize how many among the EMAs successfully launched had any response to the EMA questionnaire (`with_any_response=1`).
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Visual Diagram for Toy Dataset: A Timeline'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 # What information are *not* represented in the rows of `merged.csv`?
 
@@ -91,9 +97,11 @@ Recall that out of the 200 participants enrolled in the PNS study, 37 participan
 
 The columns suffixed by `_item_XX` refer to items within EMA questionnaires...
 
-```{r, echo = FALSE, fig.pos = 'H', fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 ...and we can tell
 
@@ -109,15 +117,19 @@ The curated smoking variables ...
 ... are provided side-by-side the original responses to EMA questionnaires. 
 
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
 
 \fboxrule.1em\fboxsep1em
 \fcolorbox{black}{red!5}{\color{black}
@@ -146,15 +158,19 @@ Recall that participants are asked to report, 'Since *the last assessment*, have
 
 Let us reinforce the concept of what it means for a participant to have provided information in a particular EMA Questionnaire *relative to the last assessment* through visual diagrams.
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Rows and Columns in Toy Dataset'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
 
 \fboxrule.1em\fboxsep1em
 \fcolorbox{black}{red!5}{\color{black}
@@ -209,6 +225,12 @@ dat_prequit_random_ema <- dat_big_merged %>%
   arrange(id, time_unixts)
 ```
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
 The file `ema_item_names.csv` can be inspected to determine the total number of items that exist in each type of EMA Questionnaire. More specifically, one may inspect the column `name_new`: the largest number `XX` in the suffix `item_XX` for a particular `assessment_type` will be the total number of items that exist in the EMA Questionnaire. In the above code snippet, `postquit_random_item_1:postquit_random_item_67` tells `R` to select those columns in `dat_big_merged` corresponding to items 1, 2, 3, ..., 67 in the Post-Quit Random EMA Questionnaire (i.e., from item 1 all the way through item 67, the last item in this type of EMA Questionnaire). On the other hand, the code snippet `prequit_random_item_1:prequit_random_item_67` tells `R` to select those columns in `dat_big_merged` corresponding to items 1, 2, 3, ..., 67 in the Pre-Quit Random EMA Questionnaire (i.e., from item 1 all the way through item 67, the last item in this type of EMA Questionnaire). 
 
 
@@ -256,6 +278,12 @@ dat_smoking <- dat_big_merged %>%
   # and within each participant ID, according to increasing time 
   arrange(id, time_unixts)
 ```
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 
 \fboxrule.1em\fboxsep1em

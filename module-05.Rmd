@@ -68,9 +68,13 @@ The dataset we now have (i.e., `dat_analysis` from Module 4) contains the follow
 
 ... and the information in these columns may be visualized in relation to each other.
 
-```{r, echo = FALSE, fig.align = 'center', out.height = '40%', out.width = '40%', fig.cap = 'Timeline'}
-knitr::include_graphics(file.path(path_pns_figures, "temp.png"))
-```
+
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
 
 \fboxrule.1em\fboxsep1em
 \fcolorbox{black}{red!5}{\color{black}
