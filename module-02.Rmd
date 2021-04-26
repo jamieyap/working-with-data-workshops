@@ -50,6 +50,12 @@ We will begin Module 2 by introducing a scientific question which we will use to
 
 We note that what we will discuss today is a simplified illustrative example of an observational Intensive Longitudinal Data (ILD) analysis.
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
+
 # Potential Issues
 
 What are potential issues we need to consider when investigating our scientific question? In this module, let's consider potential issues concerning our Independent Variable of interest.
@@ -129,10 +135,7 @@ subset_dat_prequit_random_ema <- dat_prequit_random_ema %>%
 The correspondence between the column names in `merged.csv` and the original column names in the codebook `PNS EMA Codebook 07202010.docx` can also be seen in `ema_item_names.csv` by comparing the `name_new` column against the `name_codebook` column. 
 
 
-Inspection of the codebook will show that variable names referring to the same question may be identical across different types of EMAs. As noted earlier, the question 'I *am* confident in my ability NOT TO SMOKE' is present in 8 out of the 9 types of EMA Questionnaires (i.e., all types of Questionnaires except for the Post-Quit Already Slipped EMA Questionnaire). These 8 types of EMA Questionnaires capture responses to this question in a variable named `AbsSelfEff`. There may be questions which were posed to participants only within specific kinds of EMA. For example, the question 'Think about the specific CAUSE of your slip. The cause is controllable by me.' is present in 2 out of the 9 kinds of EMA. These 2 kinds of EMA, namely the Post-Quit Already Slipped EMA and Post-Quit About to Slip Part Two EMA, captured responses to this question in a variable named `Attribution4`.   
-
-
-In the code snippet above, we have used the `ema_item_names.csv` file to pick out `postquit_random_item_8` and `prequit_random_item_8` by checking for item names under the `name_new` column which correspond to the name `AbsSelfEff` in the `name_codebook` column. 
+Let's say you're interested in self-efficacy assessed via Post-Quit Random EMAs as your Independent Variable. The question 'I *am* confident in my ability NOT TO SMOKE' is present in 8 out of the 9 types of EMA Questionnaires (i.e., all types of Questionnaires except for the Post-Quit Already Slipped EMA Questionnaire). Inspection of the codebook `PNS EMA Codebook 07202010.docx` (i.e., you do a control F (find) for the variable `AbsSelfEff`) will show that the variable name `AbsSelfEff` is identical across all types of EMA Questionnaires. Therefore, it is critical to use the file `ema_item_names.csv` to find the variable names with the *prefix* that is appropriate for your analyses. For example, if you are using self-efficacy from Post-Quit Random EMA Questionnaires for your Independent Variable, the appropriate item name would be `postquit_random_item_8`. In other words, you will need to examine the codebook `PNS EMA Codebook 07202010.docx` in parallel with the `ema_item_names.csv` to ensure that you are using the correct variable names.
 
 
 ## Step 2

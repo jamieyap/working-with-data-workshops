@@ -31,15 +31,21 @@ header-includes:
 
 # Workshop Goal
 
-The PNS documentation (e.g., see \url{https://github.com/jamieyap/PNS}) contains information on study design, how the data collected differed from the intended design, and how such deviations were addressed in the process of constructing the curated datasets. More than a mere collection of facts, the documentation seeks to organize these diverse set of information into a coherent story, allowing end-users of the curated datasets to more quickly...
+The PNS documentation (e.g., see \url{https://github.com/jamieyap/PNS}) contains information on 
 
-1. See to what extent is it feasible to investigate a particular scientific question using the data on-hand.
-2. See to what extent is it feasible to consider potential advancements in computational methodology.
+* Study design
+* How the data collected differed from the intended design
+* How such deviations were addressed in the process of constructing the curated datasets 
+
+More than a mere collection of facts, the documentation seeks to organize these diverse set of information into a coherent story, allowing end-users of the curated datasets to more quickly...
+
+1. See to what extent is it feasible to investigate a particular scientific question using the data on-hand
+2. See to what extent is it feasible to consider potential advancements in computational methodology
 
 The workshop seeks to complement the PNS documentation. By the end of this workshop, you will be able to:
 
-* Correctly interpret columns in the curated datasets.
-* Correctly identify rows which need to be included/excluded when working on (1) and/or (2) described above.
+* Correctly interpret columns in the curated datasets
+* Correctly identify rows which need to be included/excluded when working on (1) and/or (2) described above
 
 # Ground Rules
 
@@ -68,7 +74,7 @@ The workshop seeks to complement the PNS documentation. By the end of this works
 * MODULE 4: Set-Up of Dependent Variable
 * MODULE 5: Modeling and Hypothesis Testing
 
-**\textcolor{Dandelion}{COFFEE/TEA/BAGEL BREAK: 5 minutes}**
+**\textcolor{Dandelion}{COFFEE/TEA/BAGEL BREAK: 7 minutes}**
 
 **WORKSHOP WRAP UP**
 

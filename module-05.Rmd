@@ -140,6 +140,11 @@ dat_analysis$roundedup_count_within_bounds <- as.integer(ceiling(dat_analysis$co
 
 ## Step 2
 
+In this step, we will create two data files:
+
+* A data file comprising of those participants who have either *low* or *high* ambiguity in their Quit Date (`dat_main_analysis`); analyses utilizing these participants will be referred to as *'Main Analysis'*
+* A data file comprising solely of those participants who *low* ambiguity in their Quit Date (`dat_sensitivity_analysis`); analyses utilizing these participants will be referred to as *'Sensitivity Analysis'*
+
 ```{r, eval = FALSE}
 
 # Create a new data frame, which is essentially dat_analysis copied
@@ -151,13 +156,9 @@ dat_main_analysis <- dat_analysis
 dat_sensitivity_analysis <- dat_main_analysis %>% filter(sensitivity == 1)
 ```
 
-
-We note that we will be using identical models for 'Main Analysis' and 'Sensitivity Analysis'. Both types of analyses only differ with respect to which participants will be used to estimate the two models discussed above:
-
-* In 'Main Analysis', all participants in `dat_analysis` will be used to estimate both models
-* In 'Sensitivity Analysis', only those participants in `dat_analysis` having `sensitivity = 1` will be used to estimate both models
-
 ## Step 3
+
+We note that we will be using *identical models* for 'Main Analysis' and 'Sensitivity Analysis'. Both types of analyses only differ with respect to which participants will be used to estimate the two models discussed above.
 
 In the remaining steps, we will do a complete-case analysis. Rows having missing values in any of the dependent variables or independent variables will be omitted. In your analysis, you would have to consider how to address missing data in both of these variables, e.g., via an imputation procedure prior to running `glmer`.
 

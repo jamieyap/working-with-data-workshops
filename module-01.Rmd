@@ -59,6 +59,13 @@ Each row of `merged.csv` represents a successfully launched EMA questionnaire du
 * whether the participant responded *any* item in the EMA questionnaire (`with_any_response`)
 * if the participant responded to *any* item in the EMA questionnaire, when they began providing their responses (`begin_unixts`)
 
+Let's unpack the following:
+
+* What do we mean when we say **successfully launched?**
+* What do we mean when we say **having any response?**
+* How do we know **which EMA came first?**
+
+
 **Successfully launched?**
 
 We say '*successfully* launched' to emphasize that there may be prolonged periods of time when no EMA questionnaires of any type were launched (e.g., due to software issue or when phone was switched off). Hence, during such periods of time, no EMA questionnaires will be displayed on the participant's smartphone. Correspondingly, when performing a visual inspection of the data, such periods of time may be represented by a prolonged time gap between two consecutive EMA questionnaires in the `merged.csv` file.

@@ -33,16 +33,22 @@ header-includes:
 
 When we kicked off the workshop, we begun with the overarching goal of taking away the following skills from the workshop:
 
-* the ability to correctly interpret columns in the curated datasets
-* the ability to correctly identify rows which need to be included/excluded when working on *formulating* one's scientific question of interest
+* The ability to correctly interpret columns in the curated datasets
+* The ability to correctly identify rows which need to be included/excluded when working on *formulating* one's scientific question of interest
 
 Modules 1 - 5 showed more concretely how we are able to accomplish these goals. Much more, we have also:
 
-* discussed how the design of the data collection process will raise nuances one needs to consider when constructing Dependent Variables and Independent Variables. Indeed one cannot construct Dependent Variables and Independent Variables correctly without simultaneous consideration of the data collection process.
+* Discussed how the design of the data collection process will raise nuances one needs to consider when constructing Dependent Variables and Independent Variables. 
 
-* illustrated one approach to constructing the Dependent Variable. The approach uses scientific considerations (i.e., our motivating scientific question) and practical considerations (i.e., the data collection design).
+Indeed one cannot construct Dependent Variables and Independent Variables correctly without simultaneous consideration of the data collection process.
 
-* provided a tool (i.e., code) one may used to create a visual snapshot of the number of EMAs and time between EMAs within the data file `dat_smoking` -- the data file which we will be using to construct our Dependent Variable. The tool may be used to create visual snapshots that zoom in or zoom out of specific moments of time during the study period.
+* Illustrated one approach to constructing the Dependent Variable. 
+
+The approach uses scientific considerations (i.e., our motivating scientific question) and practical considerations (i.e., the data collection design).
+
+* Provided a tool (i.e., code) one may use to create a visual snapshot of the number of EMAs and time between EMAs within the data file which we will be using to construct our Dependent Variable (`dat_smoking`). 
+
+The tool may be used to create visual snapshots that zoom in or zoom out of specific moments of time during the study period.
 
 
 # Next Steps
@@ -50,6 +56,13 @@ Modules 1 - 5 showed more concretely how we are able to accomplish these goals. 
 * Workshop participants will be asked to complete a workshop evaluation survey.
 
 # Parting Points
+
+* Draw figures so that you are grasping the logic and implications of decisions made during the data preparation process.
+
+* There are many different ways to conceptualize Independent Variables and Dependent Variables; the approach we discussed today is one of many possibilities. Hence, the code implementation discussed today is not the only implementation you will ever need or use.
+
+
+# Open Discussion Session
 
 * What is a question you have about what we did *not* cover today?
 

@@ -47,6 +47,11 @@ For convenience, let's display the scientific question we introduced in an earli
 
 **SCIENTIFIC QUESTION:** On average, is self-efficacy *at the current time point* associated with *the proximal occurrence of cigarette smoking* during the post-quit period?
 
+\fboxrule.1em\fboxsep1em
+\fcolorbox{black}{blue!3}{\color{black}
+\begin{minipage}[c][2in][t]{6.3in}
+\sffamily Draw Figure Here.
+\end{minipage}}
 
 # Implementation
 
