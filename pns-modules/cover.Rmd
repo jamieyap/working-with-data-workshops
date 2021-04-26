@@ -1,0 +1,58 @@
+---
+title: ""
+date: ""
+output: 
+  pdf_document:
+    extra_dependencies: ["float"]
+    number_sections: True
+    toc: false
+    toc_depth: 1
+#  html_document:
+#    number_sections: TRUE
+#    toc: true
+#    toc_depth: 1
+#    theme: flatly
+#    highlight: zenburn
+#  word_document:
+#    number_sections: TRUE
+#    toc: true
+#    toc_depth: 1
+urlcolor: magenta
+geometry: margin=1in
+header-includes:
+   \usepackage[dvipsnames]{xcolor}
+   \usepackage{pifont}
+   \usepackage{fontenc}
+   \usepackage{anyfontsize}
+   \usepackage{inputenc}
+---
+
+
+\begingroup
+\fontsize{32}{24}\selectfont
+Working with Data Workshop
+\endgroup
+
+
+\begingroup
+\fontsize{18}{24}\selectfont
+`r format(Sys.Date(), "%B %d, %Y")`
+\endgroup
+
+\vspace{2cm}
+
+\begingroup
+\fontsize{20}{24}\selectfont
+Jamie Yap and Lindsey Potter
+\endgroup
+
+
+\begingroup
+\fontsize{20}{24}\selectfont
+\url{jamieyap@umich.edu},\hspace{-.1cm} \url{Lindsey.Potter@hci.utah.edu}
+\endgroup
+
+
+
+
+
